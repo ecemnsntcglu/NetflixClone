@@ -39,23 +39,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/redBtn"
-        android:layout_marginTop="92dp"
+        android:layout_marginTop="52dp"
         android:text="Log In"
-        app:layout_constraintEnd_toEndOf="@id/passwordEdt"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@id/passwordEdt"
-        app:layout_constraintTop_toTopOf="@id/passwordEdt" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordEdt" />
 
-    <Button
-        android:id="@+id/signinBtn"
+    <TextView
+        android:id="@+id/signinTxt"
         android:backgroundTint="@color/redBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="92dp"
         android:text="Sign In"
-        app:layout_constraintEnd_toEndOf="@id/passwordEdt"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintStart_toStartOf="@id/passwordEdt"
-        app:layout_constraintTop_toTopOf="@id/passwordEdt" />
+        android:textColor="@android:color/holo_blue_light"
+        android:textSize="16sp"
+        android:layout_marginTop="5dp"
+        app:layout_constraintEnd_toEndOf="@id/loginBtn"
+        app:layout_constraintStart_toStartOf="@id/loginBtn"
+        app:layout_constraintTop_toBottomOf="@id/loginBtn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

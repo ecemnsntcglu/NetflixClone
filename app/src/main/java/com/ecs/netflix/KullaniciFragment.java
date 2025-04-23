@@ -51,7 +51,7 @@ public class KullaniciFragment extends Fragment {
             NavHostFragment.findNavController(this).navigate(action);
         }
 
-        binding.signinBtn.setOnClickListener(v -> {
+        binding.signinTxt.setOnClickListener(v -> {
             Log.d(TAG, "Sign-in butonuna tıklandı.");
             signin();
         });
@@ -90,29 +90,10 @@ public class KullaniciFragment extends Fragment {
     }
 
     public void signin() {
-        String email = binding.emailEdt.getText().toString().trim();
-        String password = binding.passwordEdt.getText().toString().trim();
-
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(requireContext(), "Email veya parola boş olamaz!", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (isAdded()) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "createUserWithEmail:success");
-                            Toast.makeText(requireContext(), "Kayıt başarılı!", Toast.LENGTH_SHORT).show();
-                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                NavDirections action = KullaniciFragmentDirections.kullaniciToFeed();
-                                NavHostFragment.findNavController(this).navigate(action);
-                            }, 1000);
-                        } else {
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(requireContext(), "Kayıt başarısız: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        Toast.makeText(requireContext(), "Yönlendiriliyor!", Toast.LENGTH_SHORT).show();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            NavDirections action = KullaniciFragmentDirections.kullaniciToSign();
+            NavHostFragment.findNavController(this).navigate(action);
+        }, 1000);
     }
 }

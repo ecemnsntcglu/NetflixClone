@@ -13,6 +13,9 @@
         <action
             android:id="@+id/kullaniciToFeed"
             app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/kullaniciToSign"
+            app:destination="@id/kayitFragment" />
     </fragment>
 
     <fragment
@@ -23,6 +26,14 @@
         <action
             android:id="@+id/feedToKullanici"
             app:destination="@id/kullaniciFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/kayitFragment"
+        android:name="com.ecs.netflix.KayitFragment"
+        android:label="fragment_kayit">
+        <action
+            android:id="@+id/signToKullanici"
+            app:destination="@id/kayitFragment" />
     </fragment>
 
 </navigation>
