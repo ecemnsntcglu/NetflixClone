@@ -1,6 +1,8 @@
 package com.ecs.netflix;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,14 +11,10 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.ecs.netflix.databinding.FragmentKullaniciBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,6 +29,7 @@ public class KullaniciFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         auth = FirebaseAuth.getInstance();
+        Log.e("Deneme", "Selam aşkım buradayım!");
     }
 
     @Override
@@ -43,14 +42,24 @@ public class KullaniciFragment extends Fragment {
     public void onViewCreated(@androidx.annotation.NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // DEBUG: Giriş yapılmış kullanıcıyı sıfırlamak için, testten sonra kaldır!
+        auth.signOut();
+
         FirebaseUser guncelKullanici = auth.getCurrentUser();
         if (guncelKullanici != null) {
             NavDirections action = KullaniciFragmentDirections.kullaniciToFeed();
             NavHostFragment.findNavController(this).navigate(action);
         }
 
-        binding.signinBtn.setOnClickListener(v -> signin());
-        binding.loginBtn.setOnClickListener(v -> login());
+        binding.signinBtn.setOnClickListener(v -> {
+            Log.d(TAG, "Sign-in butonuna tıklandı.");
+            signin();
+        });
+
+        binding.loginBtn.setOnClickListener(v -> {
+            Log.d(TAG, "Login butonuna tıklandı.");
+            login();
+        });
     }
 
     public void login() {
@@ -67,8 +76,11 @@ public class KullaniciFragment extends Fragment {
                     if (isAdded()) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInWithEmail:success");
-                            NavDirections action = KullaniciFragmentDirections.kullaniciToFeed();
-                            NavHostFragment.findNavController(this).navigate(action);
+                            Toast.makeText(requireContext(), "Giriş başarılı!", Toast.LENGTH_SHORT).show();
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                NavDirections action = KullaniciFragmentDirections.kullaniciToFeed();
+                                NavHostFragment.findNavController(this).navigate(action);
+                            }, 1000);
                         } else {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(requireContext(), "Giriş başarısız: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -91,8 +103,11 @@ public class KullaniciFragment extends Fragment {
                     if (isAdded()) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "createUserWithEmail:success");
-                            NavDirections action = KullaniciFragmentDirections.kullaniciToFeed();
-                            NavHostFragment.findNavController(this).navigate(action);
+                            Toast.makeText(requireContext(), "Kayıt başarılı!", Toast.LENGTH_SHORT).show();
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                NavDirections action = KullaniciFragmentDirections.kullaniciToFeed();
+                                NavHostFragment.findNavController(this).navigate(action);
+                            }, 1000);
                         } else {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(requireContext(), "Kayıt başarısız: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();

@@ -14,6 +14,7 @@
             android:id="@+id/kullaniciToFeed"
             app:destination="@id/feedFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/feedFragment"
         android:name="com.ecs.netflix.FeedFragment"
@@ -23,4 +24,5 @@
             android:id="@+id/feedToKullanici"
             app:destination="@id/kullaniciFragment" />
     </fragment>
+
 </navigation>

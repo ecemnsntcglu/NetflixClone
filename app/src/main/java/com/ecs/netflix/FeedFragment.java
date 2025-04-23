@@ -8,12 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.ecs.netflix.databinding.FragmentFeedBinding;
 import com.ecs.netflix.databinding.FragmentKullaniciBinding;
 
 
 public class FeedFragment extends Fragment {
 
-    private FragmentKullaniciBinding binding;
+    private FragmentFeedBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -24,7 +25,7 @@ public class FeedFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentKullaniciBinding.inflate(inflater, container, false);
+        binding = FragmentFeedBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
         return view;
     }
