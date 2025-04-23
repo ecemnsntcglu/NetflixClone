@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                     navHostFragment.getNavController());
 
             navHostFragment.getNavController().addOnDestinationChangedListener((controller, destination, arguments) -> {
-                if (destination.getId() == R.id.kullaniciFragment) {
+                if (destination.getId() == R.id.kullaniciFragment ||destination.getId() == R.id.kayitFragment ) {
                     binding.bottomNav.setVisibility(View.GONE);
                 } else {
                     binding.bottomNav.setVisibility(View.VISIBLE);

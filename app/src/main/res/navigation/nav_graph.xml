@@ -15,6 +15,12 @@
             app:destination="@id/feedFragment"
             app:popUpTo="@id/kullaniciFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/kullaniciToSign"
+            app:destination="@id/kayitFragment"
+            app:popUpTo="@id/kullaniciFragment"
+            app:popUpToInclusive="true"
+            />
     </fragment>
 
     <fragment
@@ -22,6 +28,11 @@
         android:name="com.ecs.netflix.FeedFragment"
         android:label="fragment_feed"
         tools:layout="@layout/fragment_feed" />
+    <fragment
+        android:id="@+id/kayitFragment"
+        android:name="com.ecs.netflix.FeedFragment"
+        android:label="fragment_kayit"
+        tools:layout="@layout/fragment_kayit" />
     <fragment
         android:id="@+id/accountFragment"
         android:name="com.ecs.netflix.AccountFragment"
