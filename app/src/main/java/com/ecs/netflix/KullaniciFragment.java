@@ -42,9 +42,6 @@ public class KullaniciFragment extends Fragment {
     public void onViewCreated(@androidx.annotation.NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // DEBUG: Giriş yapılmış kullanıcıyı sıfırlamak için, testten sonra kaldır!
-        auth.signOut();
-
         FirebaseUser guncelKullanici = auth.getCurrentUser();
         if (guncelKullanici != null) {
             NavDirections action = KullaniciFragmentDirections.kullaniciToFeed();
