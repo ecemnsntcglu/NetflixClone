@@ -19,7 +19,6 @@ public class VeritabaniYardimcisi extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Tablo oluşturuluyor
         db.execSQL(
                 "CREATE TABLE IF NOT EXISTS kategoriler (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -35,7 +34,6 @@ public class VeritabaniYardimcisi extends SQLiteOpenHelper {
                         "FOREIGN KEY(kategori_id) REFERENCES kategoriler(id))"
         );
 
-        // Verileri ilk oluşturulurken ekle
         ornekVerileriEkle(db);
     }
 
@@ -46,39 +44,11 @@ public class VeritabaniYardimcisi extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Verileri dışarıdan eklemek isteyenler için parametresiz versiyon
-    public void ornekVerileriEkle() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ornekVerileriEkle(db);
+    public static List<Kategori> getKategoriler(Context context) {
+        VeritabaniYardimcisi dbHelper = new VeritabaniYardimcisi(context);
+        return dbHelper.kategorileriGetir();
     }
 
-    // Veritabanı oluşturulurken çalışan örnek veri ekleme (private)
-    private void ornekVerileriEkle(SQLiteDatabase db) {
-        // Önceden veri var mı kontrolü
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM kategoriler", null);
-        cursor.moveToFirst();
-        int kategoriSayisi = cursor.getInt(0);
-        cursor.close();
-
-        if (kategoriSayisi > 0) {
-            return; // Eğer veriler zaten varsa tekrar ekleme
-        }
-
-        // Kategoriler ekleniyor
-        db.execSQL("INSERT INTO kategoriler (kategori_adi) VALUES ('Popüler Diziler')");
-        db.execSQL("INSERT INTO kategoriler (kategori_adi) VALUES ('Komedi Dizileri')");
-        db.execSQL("INSERT INTO kategoriler (kategori_adi) VALUES ('Bilim Kurgu Dizileri')");
-
-        // Diziler ekleniyor
-        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Breaking Bad', 'breakingbad', 1)");
-        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Money Heist', 'moneyheist', 1)");
-        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Friends', 'friends', 2)");
-        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Big Bang Theory', 'bigbangtheory', 2)");
-        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Stranger Things', 'strangerthings', 3)");
-        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Dark', 'dark', 3)");
-    }
-
-    // Verileri çekmek için kullanılacak fonksiyon
     public List<Kategori> kategorileriGetir() {
         List<Kategori> kategoriler = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -108,9 +78,28 @@ public class VeritabaniYardimcisi extends SQLiteOpenHelper {
         return kategoriler;
     }
 
-    // FeedFragment gibi yerlerde kullanmak için
-    public static List<Kategori> getKategoriler(Context context) {
-        VeritabaniYardimcisi dbHelper = new VeritabaniYardimcisi(context);
-        return dbHelper.kategorileriGetir();
+    private void ornekVerileriEkle(SQLiteDatabase db) {
+        // Eğer veriler zaten varsa tekrar ekleme!
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM kategoriler", null);
+        cursor.moveToFirst();
+        int kategoriSayisi = cursor.getInt(0);
+        cursor.close();
+
+        if (kategoriSayisi > 0) {
+            return; // Zaten veri var, eklemeye gerek yok.
+        }
+
+        // --- Buradan sonrası sadece ilk kez çalışırsa yapılacak ---
+        db.execSQL("INSERT INTO kategoriler (kategori_adi) VALUES ('Popüler Diziler')");
+        db.execSQL("INSERT INTO kategoriler (kategori_adi) VALUES ('Komedi Dizileri')");
+        db.execSQL("INSERT INTO kategoriler (kategori_adi) VALUES ('Bilim Kurgu Dizileri')");
+
+        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Breaking Bad', 'breakingbad', 1)");
+        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Money Heist', 'moneyheist', 1)");
+        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Friends', 'friends', 2)");
+        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Big Bang Theory', 'bigbangtheory', 2)");
+        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Stranger Things', 'strangerthings', 3)");
+        db.execSQL("INSERT INTO diziler (dizi_adi, dizi_resim, kategori_id) VALUES ('Dark', 'dark', 3)");
     }
+
 }
