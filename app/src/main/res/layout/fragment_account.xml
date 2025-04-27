@@ -13,10 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#FFFFFF"
-    android:visibility="gone"
-    android:alpha="0"
-    android:clickable="true"
-    android:focusable="true"/>
+        android:visibility="gone"
+        android:alpha="0"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <!-- Kullanıcı adı başlığı -->
     <TextView
@@ -29,7 +29,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="54dp"/>
 
     <!-- Butonları içeren dikey LinearLayout -->
     <LinearLayout
@@ -40,7 +40,7 @@
         app:layout_constraintTop_toBottomOf="@id/tvUserName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp">
+        android:layout_marginTop="54dp">
 
         <Button
             android:id="@+id/btnBilgileriGuncelle"
@@ -71,26 +71,39 @@
             android:textSize="18sp"
             android:backgroundTint="#f3dfc1"
             android:layout_marginBottom="16dp"/>
-    </LinearLayout>
 
-    <!-- Çıkış Yap Butonu -->
-    <Button
-        android:id="@+id/btnCikis"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Çıkış Yap"
-        android:textSize="18sp"
-        android:backgroundTint="#780000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"/>
+        <!-- YENİ EKLENEN Film Ekle Butonu -->
+        <Button
+            android:id="@+id/btnCikis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Çıkış Yap"
+            android:backgroundTint="#780000"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Çıkış Yap Butonu (şimdi LinearLayout içine alındı) -->
+        <Button
+            android:id="@+id/btnFilmEkle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Film Ekle"
+            android:textSize="18sp"
+            android:textColor="#780000"
+            android:backgroundTint="#f3dfc1"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
 
     <Switch
         android:id="@+id/switchTema"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_gravity="center"
+        app:layout_constraintHorizontal_bias="0.45"
+        android:scaleX="2.0"
+        android:scaleY="2.0"
         android:showText="true"
         android:textOff="☀️"
         android:textOn="🌙"
@@ -98,6 +111,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/menuLayout" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

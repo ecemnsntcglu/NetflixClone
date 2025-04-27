@@ -1,5 +1,6 @@
 package com.ecs.netflix;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ecs.netflix.databinding.FragmentFeedBinding;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FeedFragment extends Fragment {
@@ -19,16 +24,16 @@ public class FeedFragment extends Fragment {
     private FragmentFeedBinding binding;
     private KategoriAdapter kategoriAdapter;
     private List<Kategori> kategoriler;
+    private SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // boş bırakıyoruz
+        sharedPreferences = requireContext().getSharedPreferences("UserPrefs", getContext().MODE_PRIVATE);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentFeedBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -37,15 +42,62 @@ public class FeedFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Veritabanı Yardımcısı üzerinden kategorileri çekiyoruz
-        kategoriler = VeritabaniYardimcisi.getKategoriler(requireContext());
-
-        // 2. Adapter oluşturuluyor
+        kategoriler = new ArrayList<>();
         kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler);
 
-        // 3. RecyclerView'a bağlanıyor
         binding.parentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.parentRecyclerView.setAdapter(kategoriAdapter);
+
+        // **Seçili içerik türünü al ve RecyclerView’i başlat**
+        String selectedType = sharedPreferences.getString("contentType", "Dizi");
+        kategorileriAl(selectedType);
+
+        // **ToggleGroup’a tıklama dinleyicisi ekle**
+        binding.toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                String contentType = (checkedId == R.id.btnDiziler) ? "Dizi" : "Film";
+
+                // **Kullanıcının seçimini SharedPreferences’a kaydet**
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("contentType", contentType);
+                editor.apply();
+
+                // **RecyclerView’i güncelle**
+                kategorileriAl(contentType);
+            }
+        });
+    }
+
+    private void kategorileriAl(String contentType) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String collectionName = contentType.equals("Film") ? "movies" : "series"; // **Firestore koleksiyonunu seç**
+
+        db.collection(collectionName).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                kategoriler.clear();
+                List<String> tumTurler = new ArrayList<>();
+
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    List<String> genres = (List<String>) document.get("genres");
+                    if (genres != null) {
+                        for (String genre : genres) {
+                            if (!tumTurler.contains(genre)) { // **Tekrar eden türleri engelle**
+                                tumTurler.add(genre);
+                            }
+                        }
+                    }
+                }
+
+                // **Her tür için boş kategori oluştur**
+                for (String tur : tumTurler) {
+                    kategoriler.add(new Kategori(tur, new ArrayList<>()));
+                }
+
+                kategoriAdapter.notifyDataSetChanged(); // **RecyclerView’i yenile**
+            } else {
+                System.out.println("Firestore'dan veri çekme hatası: " + task.getException());
+            }
+        });
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +55,8 @@ public class AccountFragment extends Fragment {
             NavDirections action = AccountFragmentDirections.accountToKullanici();
             NavHostFragment.findNavController(AccountFragment.this).navigate(action);
         });
+        Button btnFilmEkle = view.findViewById(R.id.btnFilmEkle);
+        btnFilmEkle.setOnClickListener(v -> filmlerliEkle());
 
         // Kullanıcı bilgilerini güncelleme butonu
         binding.btnBilgileriGuncelle.setOnClickListener(v -> showEditUserDialog());
@@ -145,6 +149,10 @@ public class AccountFragment extends Fragment {
         builder.setNegativeButton("İptal", null);
         builder.show();
     }
+private void filmlerliEkle(){
+        //film veya dizi eklemek için
+
+}
 
     @Override
     public void onDestroyView() {

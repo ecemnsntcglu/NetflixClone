@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "711727287081",
-    "project_id": "cherryflix-3f597",
-    "storage_bucket": "cherryflix-3f597.firebasestorage.app"
+    "project_number": "195741964964",
+    "project_id": "cherryflix-578c5",
+    "storage_bucket": "cherryflix-578c5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:711727287081:android:9e177d002281d285f5c538",
+        "mobilesdk_app_id": "1:195741964964:android:887f32aff4e2429238e431",
         "android_client_info": {
           "package_name": "com.ecs.netflix"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCbOGFJh1oNTsI76V4GG-X8uTAE89sNbhI"
+          "current_key": "AIzaSyBdhzJyxpGBpd4NHAVaKXPpuG2nRdYSCh4"
         }
       ],
       "services": {

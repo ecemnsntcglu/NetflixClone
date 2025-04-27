@@ -53,11 +53,14 @@ dependencies {
     implementation(libs.google.firebase.firestore)
     implementation(libs.google.firebase.database)
 
+    implementation (libs.glide)
+    annotationProcessor (libs.compiler)
+
 
     // Kotlin Navigation Bağımlılıkları
     val nav_version = "2.7.7"
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
 
     // Google Play Services for Authentication
     implementation(libs.play.services.auth)
