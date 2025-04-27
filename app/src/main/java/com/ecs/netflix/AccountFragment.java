@@ -1,35 +1,137 @@
 package com.ecs.netflix;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.ecs.netflix.databinding.FragmentAccountBinding;
-import com.ecs.netflix.databinding.FragmentFeedBinding;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
 
 public class AccountFragment extends Fragment {
 
     private FragmentAccountBinding binding;
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentAccountBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
-        return view;
+        return binding.getRoot();
     }
+
+    @Override
+    public void onViewCreated(@androidx.annotation.NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        // Kullanıcı bilgilerini yükle
+        loadUserInfo();
+
+        // Çıkış yap butonu
+        binding.btnCikis.setOnClickListener(v -> {
+            auth.signOut();
+            Toast.makeText(requireContext(), "Çıkış yapıldı!", Toast.LENGTH_SHORT).show();
+
+            // Kullanıcıyı giriş ekranına yönlendir
+            NavDirections action = AccountFragmentDirections.accountToKullanici();
+            NavHostFragment.findNavController(AccountFragment.this).navigate(action);
+        });
+
+        // Kullanıcı bilgilerini güncelleme butonu
+        binding.btnBilgileriGuncelle.setOnClickListener(v -> showEditUserDialog());
+    }
+
+    private void loadUserInfo() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid(); // Authentication UID alınıyor
+
+            db.collection("users").document(userId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String name = documentSnapshot.getString("name");
+                            binding.tvUserName.setText("Merhaba " + name.toUpperCase());
+                        } else {
+                            Toast.makeText(requireContext(), "Kullanıcı bilgileri bulunamadı!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(requireContext(), "Bilgileri yükleme hatası!", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private void showEditUserDialog() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) return;
+
+        String userId = user.getUid(); // Firestore'daki kullanıcı ID'sini al
+
+        // `LinearLayout` ile iç içe düzenleme alanı oluştur
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 20, 50, 20);
+
+        EditText etName = new EditText(getContext());
+        EditText etSurname = new EditText(getContext());
+        EditText etEmail = new EditText(getContext());
+        EditText etPhone = new EditText(getContext());
+
+        layout.addView(etName);
+        layout.addView(etSurname);
+        layout.addView(etEmail);
+        layout.addView(etPhone);
+
+        // Firestore'daki mevcut verileri `EditText` içine yerleştir
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        etName.setText(documentSnapshot.getString("name"));     // Kullanıcının adı
+                        etSurname.setText(documentSnapshot.getString("surname")); // Soyadı
+                        etEmail.setText(documentSnapshot.getString("email"));   // E-posta adresi
+                        etPhone.setText(documentSnapshot.getString("phone"));   // Telefon numarası
+                    }
+                });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Bilgileri Güncelle");
+        builder.setView(layout);  // **Artık tüm `EditText`'lerde mevcut bilgiler görünecek!**
+        builder.setPositiveButton("Kaydet", (dialog, which) -> {
+            String newName = etName.getText().toString();
+            String newSurname = etSurname.getText().toString();
+            String newEmail = etEmail.getText().toString();
+            String newPhone = etPhone.getText().toString();
+
+            Map<String, Object> updatedData = new HashMap<>();
+            updatedData.put("name", newName);
+            updatedData.put("surname", newSurname);
+            updatedData.put("email", newEmail);
+            updatedData.put("phone", newPhone);
+
+            db.collection("users").document(userId)
+                    .update(updatedData)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Bilgiler Güncellendi!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Güncelleme Başarısız!", Toast.LENGTH_SHORT).show());
+        });
+
+        builder.setNegativeButton("İptal", null);
+        builder.show();
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
