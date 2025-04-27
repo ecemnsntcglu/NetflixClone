@@ -17,13 +17,13 @@ import java.util.List;
 public class FeedFragment extends Fragment {
 
     private FragmentFeedBinding binding;
-    private List<Kategori> kategoriler;
     private KategoriAdapter kategoriAdapter;
+    private List<Kategori> kategoriler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Şu anda burada işimiz yok
+        // boş bırakıyoruz
     }
 
     @Override
@@ -37,15 +37,13 @@ public class FeedFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Veritabanı oluştur ve örnek verileri ekle
-        VeritabaniYardimcisi dbHelper = new VeritabaniYardimcisi(requireContext());
-        dbHelper.ornekVerileriEkle();  // ← Hatasız şekilde çağırdık!
-
-        // Veritabanından kategorileri çek
+        // 1. Veritabanı Yardımcısı üzerinden kategorileri çekiyoruz
         kategoriler = VeritabaniYardimcisi.getKategoriler(requireContext());
 
-        // Adapter oluştur ve bağla
+        // 2. Adapter oluşturuluyor
         kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler);
+
+        // 3. RecyclerView'a bağlanıyor
         binding.parentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.parentRecyclerView.setAdapter(kategoriAdapter);
     }

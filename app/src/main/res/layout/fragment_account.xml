@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="?attr/fragmentBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".AccountFragment">
+
+    <View
+        android:id="@+id/fadeView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+    android:visibility="gone"
+    android:alpha="0"
+    android:clickable="true"
+    android:focusable="true"/>
 
     <!-- Kullanıcı adı başlığı -->
     <TextView
@@ -74,4 +85,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"/>
+
+    <Switch
+        android:id="@+id/switchTema"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:showText="true"
+        android:textOff="☀️"
+        android:textOn="🌙"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/menuLayout" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

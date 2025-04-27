@@ -1,9 +1,21 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Netflix" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/fragment_background_light</item>
+
+        <item name="fragmentBackground">@color/fragment_background_light</item>
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="RoundedImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">4%</item>
+    </style>
+
+
+
     <style name="Theme.Netflix" parent="Base.Theme.Netflix" />
+
+
 </resources>
