@@ -59,16 +59,18 @@ public class AccountFragment extends Fragment {
 
         // 🌙 Tema değiştirme butonu
         ThemePrefManager themePrefManager = new ThemePrefManager(requireContext());
-
         binding.switchTema.setOnClickListener(v -> {
             if (themePrefManager.isDarkMode()) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 themePrefManager.setDarkMode(false);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 themePrefManager.setDarkMode(true);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             }
+
+
         });
+
     }
 
     private void loadUserInfo() {

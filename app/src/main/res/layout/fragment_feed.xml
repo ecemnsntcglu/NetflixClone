@@ -5,15 +5,126 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#800F2F"
+    android:background="?attr/fragmentBackground"
     tools:context=".FeedFragment">
 
+    <!-- Üstte Ana Sayfa RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/parentRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="422dp"
+        android:layout_marginBottom="100dp"
         android:padding="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/item_parent" />
+
+    <!-- Orta Kısımda Film Kartı -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardview"
+        android:layout_width="275dp"
+        android:layout_height="367dp"
+        android:layout_marginTop="29dp"
+        app:cardBackgroundColor="#121212"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- CardView içine ConstraintLayout koyduk -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Görsel -->
+
+            <!-- Oynat Butonu -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imageView"
+                android:layout_width="275dp"
+                android:layout_height="367dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ds"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.461"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.28"
+                app:shapeAppearanceOverlay="@style/RoundedImageView" />
+
+            <Button
+                android:id="@+id/btnOynat"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/yuvarlak_border"
+                android:backgroundTint="@android:color/transparent"
+
+                android:drawableLeft="@drawable/playbtn"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="Oynat"
+                android:textColor="#000000"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnListeyeEkle"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Listem Butonu -->
+            <Button
+                android:id="@+id/btnListeyeEkle"
+                android:layout_width="0dp"
+
+                android:layout_height="36dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/yuvarlak_border"
+                android:backgroundTint="@android:color/transparent"
+
+                android:drawableLeft="@drawable/addbtn"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="Listem"
+                android:textColor="#000000"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btnOynat" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Alt Kısımda Bugün 1 Numara Yazısı -->
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Bugün #1 Numara!"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-light"
+        app:layout_constraintTop_toBottomOf="@id/cardview"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

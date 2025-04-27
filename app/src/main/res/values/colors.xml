@@ -4,4 +4,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="editTColor">#f7f8f4</color>
     <color name="redBtn">#e50913</color>
+    <color name="border">#E0E0E0</color>
+
+
+        <color name="fragment_background_light">#831010</color>
+        <color name="fragment_background_dark">#000000</color>
+
+
+
 </resources>
