@@ -52,16 +52,39 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"/>
 
+    <EditText
+        android:id="@+id/etSifre"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Şifre"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/etTelefon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"/>
+
+    <EditText
+        android:id="@+id/etSifreTekrar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Şifreyi Tekrar Girin"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/etSifre"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"/>
+
     <Button
         android:id="@+id/btnKayit"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:text="Kayıt Ol"
         android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@id/etTelefon"
+        app:layout_constraintTop_toBottomOf="@id/etSifreTekrar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.08"
         android:layout_margin="16dp"
         android:backgroundTint="#780000"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

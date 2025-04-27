@@ -5,3 +5,8 @@ plugins {
     id("androidx.navigation.safeargs") version "2.8.9" apply false
 
 }
+buildscript {
+    dependencies {
+        classpath(libs.google.services)
+    }
+}

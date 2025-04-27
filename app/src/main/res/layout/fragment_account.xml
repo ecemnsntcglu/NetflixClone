@@ -1,22 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".AccountFragment">
 
+    <!-- Kullanıcı adı başlığı -->
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvUserName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="156dp"
-        android:layout_marginTop="364dp"
-        android:layout_marginEnd="179dp"
-        android:layout_marginBottom="424dp"
-        android:text="Hesabım"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Kullanıcı Adı"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
+
+    <!-- Butonları içeren dikey LinearLayout -->
+    <LinearLayout
+        android:id="@+id/menuLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/tvUserName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp">
+
+        <Button
+            android:id="@+id/btnBilgileriGuncelle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bilgilerimi Güncelle"
+            android:textColor="#780000"
+            android:textSize="18sp"
+            android:backgroundTint="#f3dfc1"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnIzlemeGecmisim"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="İzleme Geçmişim"
+            android:textColor="#780000"
+            android:textSize="18sp"
+            android:backgroundTint="#f3dfc1"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnFavoriListem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#780000"
+            android:text="Favori Listem"
+            android:textSize="18sp"
+            android:backgroundTint="#f3dfc1"
+            android:layout_marginBottom="16dp"/>
+    </LinearLayout>
+
+    <!-- Çıkış Yap Butonu -->
+    <Button
+        android:id="@+id/btnCikis"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Çıkış Yap"
+        android:textSize="18sp"
+        android:backgroundTint="#780000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

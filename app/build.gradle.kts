@@ -1,16 +1,16 @@
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
     id("androidx.navigation.safeargs")
+    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.ecs.netflix"
     compileSdk = 35
 
-   buildFeatures {
-       viewBinding=true
-   }
+    buildFeatures {
+        viewBinding = true
+    }
 
     defaultConfig {
         applicationId = "com.ecs.netflix"
@@ -31,33 +31,42 @@ android {
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 
 dependencies {
-
+    // Material Design ve AppCompat kütüphaneleri
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.firebase.database)
+
+    // Firebase Bağımlılıkları
+    implementation(platform(libs.firebase.bom.v3300))
+
+    // Firebase modülleri, BOM tarafından yönetilecek
+    implementation(libs.google.firebase.auth)
+    implementation(libs.google.firebase.firestore)
+    implementation(libs.google.firebase.database)
+
+
+    // Kotlin Navigation Bağımlılıkları
+    val nav_version = "2.7.7"
+    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
+    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
+
+    // Google Play Services for Authentication
+    implementation(libs.play.services.auth)
+
+    // Picasso for image loading
+    implementation("com.squareup.picasso:picasso:2.8")
+
+    // Test Bağımlılıkları
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
-    val nav_version = "2.7.7"
-    // Kotlin
-    implementation(libs.navigation.fragment.ktx)
-    implementation(libs.navigation.ui.ktx)
-
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage)
-    implementation (libs.picasso)
 }
