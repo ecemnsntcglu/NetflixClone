@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -55,12 +56,25 @@ public class AccountFragment extends Fragment {
 
         // Kullanıcı bilgilerini güncelleme butonu
         binding.btnBilgileriGuncelle.setOnClickListener(v -> showEditUserDialog());
+
+        // 🌙 Tema değiştirme butonu
+        ThemePrefManager themePrefManager = new ThemePrefManager(requireContext());
+
+        binding.switchTema.setOnClickListener(v -> {
+            if (themePrefManager.isDarkMode()) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                themePrefManager.setDarkMode(false);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                themePrefManager.setDarkMode(true);
+            }
+        });
     }
 
     private void loadUserInfo() {
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
-            String userId = user.getUid(); // Authentication UID alınıyor
+            String userId = user.getUid();
 
             db.collection("users").document(userId).get()
                     .addOnSuccessListener(documentSnapshot -> {
@@ -79,9 +93,8 @@ public class AccountFragment extends Fragment {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) return;
 
-        String userId = user.getUid(); // Firestore'daki kullanıcı ID'sini al
+        String userId = user.getUid();
 
-        // `LinearLayout` ile iç içe düzenleme alanı oluştur
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 20, 50, 20);
@@ -96,20 +109,19 @@ public class AccountFragment extends Fragment {
         layout.addView(etEmail);
         layout.addView(etPhone);
 
-        // Firestore'daki mevcut verileri `EditText` içine yerleştir
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        etName.setText(documentSnapshot.getString("name"));     // Kullanıcının adı
-                        etSurname.setText(documentSnapshot.getString("surname")); // Soyadı
-                        etEmail.setText(documentSnapshot.getString("email"));   // E-posta adresi
-                        etPhone.setText(documentSnapshot.getString("phone"));   // Telefon numarası
+                        etName.setText(documentSnapshot.getString("name"));
+                        etSurname.setText(documentSnapshot.getString("surname"));
+                        etEmail.setText(documentSnapshot.getString("email"));
+                        etPhone.setText(documentSnapshot.getString("phone"));
                     }
                 });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Bilgileri Güncelle");
-        builder.setView(layout);  // **Artık tüm `EditText`'lerde mevcut bilgiler görünecek!**
+        builder.setView(layout);
         builder.setPositiveButton("Kaydet", (dialog, which) -> {
             String newName = etName.getText().toString();
             String newSurname = etSurname.getText().toString();
