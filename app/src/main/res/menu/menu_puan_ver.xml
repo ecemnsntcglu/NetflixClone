@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_begenmedim"
+        android:title="Beğenmedim" />
+
+    <item
+        android:id="@+id/action_begendim"
+        android:title="Beğendim" />
+
+    <item
+        android:id="@+id/action_cok_begendim"
+        android:title="Çok Beğendim" />
+
+</menu>
