@@ -16,8 +16,8 @@
         <ImageView
             android:id="@+id/imageViewTrailer"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
+            android:layout_height="400dp"
+            android:scaleType="fitCenter"
             android:contentDescription="Trailer" />
 
         <!-- Dizi / Film Adı -->
