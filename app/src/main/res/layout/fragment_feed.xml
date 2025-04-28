@@ -156,14 +156,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:gravity="center"/>
 
-    <Button
-        android:id="@+id/buttonBolumEkle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Bölümleri Yükle"
-        app:layout_constraintBottom_toTopOf="@+id/parentRecyclerView"
-        app:layout_constraintStart_toStartOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

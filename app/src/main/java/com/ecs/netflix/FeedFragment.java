@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ecs.netflix.databinding.FragmentFeedBinding;
@@ -66,6 +68,15 @@ public class FeedFragment extends Fragment {
                 kategorileriAl(contentType);
             }
         });
+
+        binding.btnOynat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NavDirections action = FeedFragmentDirections.feedToDetay();
+                NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            }
+        });
+
     }
 
     private void kategorileriAl(String contentType) {
@@ -99,6 +110,8 @@ public class FeedFragment extends Fragment {
             }
         });
     }
+
+
 
     @Override
     public void onDestroyView() {

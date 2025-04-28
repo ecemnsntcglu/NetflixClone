@@ -39,7 +39,11 @@
         android:id="@+id/feedFragment"
         android:name="com.ecs.netflix.FeedFragment"
         android:label="fragment_feed"
-        tools:layout="@layout/fragment_feed" />
+        tools:layout="@layout/fragment_feed" >
+        <action
+            android:id="@+id/feedToDetay"
+            app:destination="@id/detayFragment" />
+    </fragment>
     <fragment
         android:id="@+id/kayitFragment"
         android:name="com.ecs.netflix.KayitFragment"
@@ -56,5 +60,9 @@
         android:name="com.ecs.netflix.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/detayFragment"
+        android:name="com.ecs.netflix.DetayFragment"
+        android:label="DetayFragment" />
 
 </navigation>
