@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.ecs.netflix.databinding.FragmentDetayBinding;
 
 public class DetayFragment extends Fragment {
@@ -71,5 +72,22 @@ public class DetayFragment extends Fragment {
             Intent shareIntent = Intent.createChooser(sendIntent, null);
             startActivity(shareIntent);
         });
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            String title = bundle.getString("title");
+            String posterUrl = bundle.getString("poster_url");
+
+            // Başlığı güncelle
+            binding.textViewTitle.setText(title);
+
+            // Poster görselini yükle
+            Glide.with(requireContext())
+                    .load(posterUrl)
+                    .placeholder(R.drawable.placeholderpic) // Yüklenirken gösterilecek görsel
+                    .error(R.drawable.placeholderpic)       // Hata olursa gösterilecek
+                    .into(binding.imageViewTrailer);
+        }
+
     }
 }

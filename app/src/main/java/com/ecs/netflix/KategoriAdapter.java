@@ -1,22 +1,19 @@
 package com.ecs.netflix;
 
-import com.ecs.netflix.Kategori;
-
-
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
 
-import com.ecs.netflix.R;
-import com.ecs.netflix.Dizi;
-import com.ecs.netflix.Kategori;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -27,10 +24,12 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
 
     private Context context;
     private List<Kategori> kategoriListesi;
+    private Fragment fragment; // 🔥 BURAYA EKLENDİ
 
-    public KategoriAdapter(Context context, List<Kategori> kategoriListesi) {
+    public KategoriAdapter(Context context, List<Kategori> kategoriListesi, Fragment fragment) {
         this.context = context;
         this.kategoriListesi = kategoriListesi;
+        this.fragment = fragment; // 🔥 FRAGMENTİ ALIYORUZ
     }
 
     @NonNull
@@ -45,14 +44,13 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
         Kategori kategori = kategoriListesi.get(position);
         holder.kategoriText.setText(kategori.getKategoriAdi());
 
-        // Kullanıcının seçtiği içerik türünü SharedPreferences'tan al
         SharedPreferences sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        String contentType = sharedPreferences.getString("contentType", "Dizi"); // Varsayılan "Dizi"
+        String contentType = sharedPreferences.getString("contentType", "Dizi");
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         if (contentType.equals("Film")) {
-            // **Film Listesi Oluştur**
+            // 🔥 Film Listesi (DEĞİŞMEDİ)
             List<Film> filmListesi = new ArrayList<>();
             db.collection("movies").whereArrayContains("genres", kategori.getKategoriAdi()).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -61,13 +59,22 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
                         filmListesi.add(film);
                     }
 
-                    FilmAdapter filmAdapter = new FilmAdapter(context, filmListesi);
+                    FilmAdapter filmAdapter = new FilmAdapter(context, filmListesi, selectedFilm -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("title", selectedFilm.getTitle());
+                        bundle.putString("poster_url", selectedFilm.getPoster_url());
+
+                        Navigation.findNavController(holder.itemView)
+                                .navigate(R.id.feedToDetay, bundle);
+                    });
+
                     holder.diziRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
                     holder.diziRecyclerView.setAdapter(filmAdapter);
+
                 }
             });
         } else {
-            // **Dizi Listesi Oluştur**
+            // 🔥 Dizi Listesi (TIKLAMA EKLENDİ)
             List<Dizi> diziListesi = new ArrayList<>();
             db.collection("series").whereArrayContains("genres", kategori.getKategoriAdi()).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -76,7 +83,16 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
                         diziListesi.add(dizi);
                     }
 
-                    DiziAdapter diziAdapter = new DiziAdapter(context, diziListesi);
+                    DiziAdapter diziAdapter = new DiziAdapter(context, diziListesi, selectedDizi -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("title", selectedDizi.getTitle());
+                        bundle.putString("poster_url", selectedDizi.getPoster_url());
+
+                        Navigation.findNavController(holder.itemView)
+                                .navigate(R.id.feedToDetay, bundle);
+
+                    });
+
                     holder.diziRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
                     holder.diziRecyclerView.setAdapter(diziAdapter);
                 }

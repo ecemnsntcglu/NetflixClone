@@ -67,7 +67,7 @@ public class FeedFragment extends Fragment {
 
 
         kategoriler = new ArrayList<>();
-        kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler);
+        kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler, this);
 
         binding.parentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.parentRecyclerView.setAdapter(kategoriAdapter);

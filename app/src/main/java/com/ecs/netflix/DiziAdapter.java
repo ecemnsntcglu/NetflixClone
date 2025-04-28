@@ -1,7 +1,6 @@
 package com.ecs.netflix;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -17,10 +16,16 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
 
     private Context context;
     private List<Dizi> diziListesi;
+    private OnItemClickListener listener;
 
-    public DiziAdapter(Context context, List<Dizi> diziListesi) {
+    public interface OnItemClickListener {
+        void onItemClick(Dizi dizi);
+    }
+
+    public DiziAdapter(Context context, List<Dizi> diziListesi, OnItemClickListener listener) {
         this.context = context;
         this.diziListesi = diziListesi;
+        this.listener = listener;
     }
 
     @NonNull
@@ -35,13 +40,17 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
         Dizi dizi = diziListesi.get(position);
         holder.binding.textViewDiziAdi.setText(dizi.getTitle());
 
-        // Glide ile görsel yükleme
         Glide.with(context)
-                .load(dizi.getPoster_url()) // Firestore'dan gelen URL
-                .placeholder(R.drawable.placeholderpic) // Yüklenirken gösterilecek görsel
-                .error(R.drawable.placeholderpic) // Hata durumunda gösterilecek görsel
+                .load(dizi.getPoster_url())
+                .placeholder(R.drawable.placeholderpic)
+                .error(R.drawable.placeholderpic)
                 .into(holder.binding.imageViewDizi);
-        Log.d("Firestore", "Poster URL: " + dizi.getPoster_url());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(dizi);
+            }
+        });
     }
 
     @Override
