@@ -10,6 +10,10 @@
         <color name="fragment_background_light">#831010</color>
         <color name="fragment_background_dark">#000000</color>
 
+    <color name="toogle_light">#eeeee4</color>
+    <color name="toogle_dark">#dedede</color>
 
+    <color name="buton_light">#eeeee4</color>
+    <color name="buton_dark">#eeeee4</color>
 
 </resources>

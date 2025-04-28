@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -43,6 +44,27 @@ public class FeedFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        ThemePrefManager themePrefManager = new ThemePrefManager(requireContext());
+        int toggleGroupColor = themePrefManager.isDarkMode() ? R.color.toogle_dark : R.color.toogle_light;
+        int buttonColor = themePrefManager.isDarkMode() ? R.color.toogle_dark : R.color.toogle_light;
+        binding.toggleGroup.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), toggleGroupColor));
+        binding.btnDiziler.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), buttonColor));
+        binding.btnFilmler.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), buttonColor));
+        int textColorId = themePrefManager.isDarkMode() ?
+                R.color.buton_dark :
+                R.color.buton_light;
+
+        int borderDrawableId = themePrefManager.isDarkMode() ?
+                R.drawable.buton_border : // bunu şimdi hazırlayacağız
+                R.drawable.buton_border;
+        binding.btnOynat.setTextColor(ContextCompat.getColor(requireContext(), textColorId));
+        binding.btnListeyeEkle.setTextColor(ContextCompat.getColor(requireContext(), textColorId));
+
+        binding.btnOynat.setBackgroundResource(borderDrawableId);
+        binding.btnListeyeEkle.setBackgroundResource(borderDrawableId);
+
+
 
         kategoriler = new ArrayList<>();
         kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler);
