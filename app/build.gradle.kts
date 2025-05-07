@@ -66,10 +66,15 @@ dependencies {
     implementation(libs.play.services.auth)
 
     // Picasso for image loading
-    implementation("com.squareup.picasso:picasso:2.8")
+    implementation(libs.picasso.v28)
 
     // Test Bağımlılıkları
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:11.1.0")
+
+
+
 }

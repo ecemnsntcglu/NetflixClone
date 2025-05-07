@@ -60,9 +60,16 @@
         android:name="com.ecs.netflix.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
+
+
     <fragment
         android:id="@+id/detayFragment"
         android:name="com.ecs.netflix.DetayFragment"
-        android:label="DetayFragment" />
+        android:label="DetayFragment">
+        <argument android:name="title" app:argType="string" />
+        <argument android:name="trailer_url" app:argType="string" />
+        <argument android:name="poster_url" app:argType="string" />
+    </fragment>
+
 
 </navigation>
