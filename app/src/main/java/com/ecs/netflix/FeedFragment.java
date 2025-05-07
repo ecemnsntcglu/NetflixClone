@@ -15,7 +15,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ecs.netflix.databinding.FragmentFeedBinding;
-import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -48,62 +47,52 @@ public class FeedFragment extends Fragment {
         ThemePrefManager themePrefManager = new ThemePrefManager(requireContext());
         int toggleGroupColor = themePrefManager.isDarkMode() ? R.color.toogle_dark : R.color.toogle_light;
         int buttonColor = themePrefManager.isDarkMode() ? R.color.toogle_dark : R.color.toogle_light;
+
         binding.toggleGroup.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), toggleGroupColor));
         binding.btnDiziler.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), buttonColor));
         binding.btnFilmler.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), buttonColor));
-        int textColorId = themePrefManager.isDarkMode() ?
-                R.color.buton_dark :
-                R.color.buton_light;
 
-        int borderDrawableId = themePrefManager.isDarkMode() ?
-                R.drawable.buton_border :
-                R.drawable.buton_border;
+        int textColorId = themePrefManager.isDarkMode() ? R.color.buton_dark : R.color.buton_light;
+        int borderDrawableId = themePrefManager.isDarkMode() ? R.drawable.buton_border : R.drawable.buton_border;
+
         binding.btnOynat.setTextColor(ContextCompat.getColor(requireContext(), textColorId));
         binding.btnListeyeEkle.setTextColor(ContextCompat.getColor(requireContext(), textColorId));
-
         binding.btnOynat.setBackgroundResource(borderDrawableId);
         binding.btnListeyeEkle.setBackgroundResource(borderDrawableId);
 
-
-
         kategoriler = new ArrayList<>();
-        kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler, this);
 
-        binding.parentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.parentRecyclerView.setAdapter(kategoriAdapter);
-
-        // **Seçili içerik türünü al ve RecyclerView’i başlat**
-        String selectedType = sharedPreferences.getString("contentType", "Dizi");
-        kategorileriAl(selectedType);
-
-        // **ToggleGroup’a tıklama dinleyicisi ekle**
-        binding.toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (isChecked) {
-                String contentType = (checkedId == R.id.btnDiziler) ? "Dizi" : "Film";
-
-                // **Kullanıcının seçimini SharedPreferences’a kaydet**
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("contentType", contentType);
-                editor.apply();
-
-                // **RecyclerView’i güncelle**
-                kategorileriAl(contentType);
-            }
-        });
-
-        binding.btnOynat.setOnClickListener(new View.OnClickListener() {
+        kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler, new DiziAdapter.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                NavDirections action = FeedFragmentDirections.feedToDetay();
+            public void onItemClick(Dizi dizi) {
+                NavDirections action = FeedFragmentDirections.feedToDetay(
+                        dizi.getTitle(),
+                        dizi.getTrailer_url(),
+                        dizi.getPoster_url()
+
+                );
                 NavHostFragment.findNavController(FeedFragment.this).navigate(action);
             }
         });
 
+        binding.parentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.parentRecyclerView.setAdapter(kategoriAdapter);
+
+        String selectedType = sharedPreferences.getString("contentType", "Dizi");
+        kategorileriAl(selectedType);
+
+        binding.toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                String contentType = (checkedId == R.id.btnDiziler) ? "Dizi" : "Film";
+                sharedPreferences.edit().putString("contentType", contentType).apply();
+                kategorileriAl(contentType);
+            }
+        });
     }
 
     private void kategorileriAl(String contentType) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String collectionName = contentType.equals("Film") ? "movies" : "series"; // **Firestore koleksiyonunu seç**
+        String collectionName = contentType.equals("Film") ? "movies" : "series";
 
         db.collection(collectionName).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -114,26 +103,23 @@ public class FeedFragment extends Fragment {
                     List<String> genres = (List<String>) document.get("genres");
                     if (genres != null) {
                         for (String genre : genres) {
-                            if (!tumTurler.contains(genre)) { // **Tekrar eden türleri engelle**
+                            if (!tumTurler.contains(genre)) {
                                 tumTurler.add(genre);
                             }
                         }
                     }
                 }
 
-                // **Her tür için boş kategori oluştur**
                 for (String tur : tumTurler) {
                     kategoriler.add(new Kategori(tur, new ArrayList<>()));
                 }
 
-                kategoriAdapter.notifyDataSetChanged(); // **RecyclerView’i yenile**
+                kategoriAdapter.notifyDataSetChanged();
             } else {
                 System.out.println("Firestore'dan veri çekme hatası: " + task.getException());
             }
         });
     }
-
-
 
     @Override
     public void onDestroyView() {
