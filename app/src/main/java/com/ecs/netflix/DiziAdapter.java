@@ -18,6 +18,11 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
     private List<Dizi> diziListesi;
     private OnItemClickListener listener;
 
+    public void setDiziListesi(List<Dizi> filtreliDiziler) {
+        this.diziListesi=filtreliDiziler;
+        notifyDataSetChanged();
+    }
+
     public interface OnItemClickListener {
         void onItemClick(Dizi dizi);
     }

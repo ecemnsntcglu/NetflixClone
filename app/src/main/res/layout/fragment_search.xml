@@ -1,15 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/fragmentBackground"
-    tools:context=".SearchFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content">
 
-</FrameLayout>
+        <!-- Arama Çubuğu -->
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:queryHint="Film veya Dizi Ara..."
+            android:iconifiedByDefault="false"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Film Başlık -->
+        <TextView
+            android:id="@+id/textViewMoviesTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filmler"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/searchView"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Film Sonuçları -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewMovies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/textViewMoviesTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Film bulunamadı mesajı -->
+        <TextView
+            android:id="@+id/textViewNoMoviesFound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Film için sonuç bulunamadı"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/recyclerViewMovies"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Dizi Başlık -->
+        <TextView
+            android:id="@+id/textViewSeriesTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Diziler"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/textViewNoMoviesFound"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Dizi Sonuçları -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewSeries"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/textViewSeriesTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Dizi bulunamadı mesajı -->
+        <TextView
+            android:id="@+id/textViewNoSeriesFound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dizi için sonuç bulunamadı"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/recyclerViewSeries"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

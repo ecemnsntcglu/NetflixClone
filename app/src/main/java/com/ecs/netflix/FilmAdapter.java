@@ -20,6 +20,11 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmViewHolder
     private List<Film> filmListesi;
     private OnItemClickListener listener;
 
+    public void setFilmListesi(List<Film> filtreliFilmler) {
+        this.filmListesi=filtreliFilmler;
+        notifyDataSetChanged();
+    }
+
     public interface OnItemClickListener {
         void onItemClick(Film film);
     }
