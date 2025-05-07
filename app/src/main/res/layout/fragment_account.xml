@@ -72,6 +72,23 @@
             android:backgroundTint="#f3dfc1"
             android:layout_marginBottom="16dp"/>
 
+        <TextView
+            android:id="@+id/tvLikedHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Beğendiğin İçerikler"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewLiked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+
+
         <!-- YENİ EKLENEN Film Ekle Butonu -->
         <Button
             android:id="@+id/btnCikis"

@@ -47,4 +47,17 @@ public class Dizi{
     public String getDescription() { return description; }
     public List<String> getCast() { return cast; }
     public List<String> getGenres() { return genres; }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.poster_url = posterUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailer_url = trailerUrl;
+    }
+
 }

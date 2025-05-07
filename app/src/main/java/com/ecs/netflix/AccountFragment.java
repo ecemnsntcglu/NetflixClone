@@ -14,14 +14,19 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ecs.netflix.databinding.FragmentAccountBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AccountFragment extends Fragment {
@@ -40,8 +45,11 @@ public class AccountFragment extends Fragment {
     public void onViewCreated(@androidx.annotation.NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        loadLikedContent();
 
         // Kullanıcı bilgilerini yükle
         loadUserInfo();
@@ -159,4 +167,27 @@ private void filmlerliEkle(){
         super.onDestroyView();
         binding = null;
     }
+
+    private void loadLikedContent() {
+        List<Dizi> likedList = new ArrayList<>();
+        LikedAdapter likedAdapter = new LikedAdapter(requireContext(), likedList);
+
+        binding.recyclerViewLiked.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.recyclerViewLiked.setAdapter(likedAdapter);
+
+        db.collection("likedContent")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Dizi dizi = new Dizi();
+                        dizi.setTitle(doc.getString("title"));
+                        dizi.setPosterUrl(doc.getString("poster_url"));
+                        dizi.setTrailerUrl(doc.getString("trailer_url"));
+                        likedList.add(dizi);
+                    }
+                    likedAdapter.notifyDataSetChanged();
+                });
+    }
+
 }
