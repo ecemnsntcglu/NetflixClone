@@ -20,10 +20,6 @@
             android:layout_height="200dp"
             app:autoPlay="false"/>
 
-
-
-
-
         <!-- Dizi / Film Adı -->
         <TextView
             android:id="@+id/textViewTitle"
@@ -43,7 +39,7 @@
             android:orientation="horizontal"
             android:gravity="center"
             android:layout_marginTop="16dp"
-            android:weightSum="2">
+            android:weightSum="3">
 
             <!-- PUAN VER butonu -->
             <LinearLayout
@@ -65,6 +61,31 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Puan Ver"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <!-- FAV butonu (Kalp) -->
+            <LinearLayout
+                android:id="@+id/layoutFav"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/imageFav"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/non_fav_btn"
+                android:contentDescription="Favorilere Ekle"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Favorilere Ekle"
                     android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:layout_marginTop="4dp"/>
@@ -94,7 +115,6 @@
                     android:textSize="12sp"
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
-
 
         </LinearLayout>
 

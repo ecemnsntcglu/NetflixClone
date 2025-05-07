@@ -19,7 +19,7 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
     private OnItemClickListener listener;
 
     public void setDiziListesi(List<Dizi> filtreliDiziler) {
-        this.diziListesi=filtreliDiziler;
+        this.diziListesi = filtreliDiziler;
         notifyDataSetChanged();
     }
 
@@ -51,9 +51,10 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
                 .error(R.drawable.placeholderpic)
                 .into(holder.binding.imageViewDizi);
 
+        // Tıklama işlemi
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onItemClick(dizi);
+                listener.onItemClick(dizi); // Burada item tıklama işlemi tetikleniyor
             }
         });
     }

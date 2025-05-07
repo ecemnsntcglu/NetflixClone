@@ -19,7 +19,7 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmViewHolder
     private OnItemClickListener listener;
 
     public void setFilmListesi(List<Film> filtreliFilmler) {
-        this.filmListesi=filtreliFilmler;
+        this.filmListesi = filtreliFilmler;
         notifyDataSetChanged();
     }
 
@@ -46,14 +46,15 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmViewHolder
         holder.binding.textViewDiziAdi.setText(film.getTitle());
 
         Glide.with(context)
-                .load(film.getPoster_url()) // ✅ camelCase!
+                .load(film.getPoster_url())
                 .placeholder(R.drawable.placeholderpic)
                 .error(R.drawable.placeholderpic)
                 .into(holder.binding.imageViewDizi);
 
+        // Tıklama işlemi
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onItemClick(film);
+                listener.onItemClick(film); // Burada item tıklama işlemi tetikleniyor
             }
         });
     }

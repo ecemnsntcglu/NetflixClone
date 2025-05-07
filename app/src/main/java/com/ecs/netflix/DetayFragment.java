@@ -2,6 +2,7 @@ package com.ecs.netflix;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.ecs.netflix.databinding.FragmentDetayBinding;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
@@ -46,31 +49,58 @@ public class DetayFragment extends Fragment {
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
 
-                // Firebase'e ekleme işlemi
-                String title = getArguments().getString("title");
-                String trailerUrl = getArguments().getString("trailer_url");
-                String posterUrl = getArguments().getString("poster_url");
-
-                // Firebase'ye kaydetme işlemi
+                // Firebase işlemi
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-                if (id == R.id.action_begenmedim) {
-                    Toast.makeText(getContext(), "Beğenmedim seçildi", Toast.LENGTH_SHORT).show();
-                } else if (id == R.id.action_begendim || id == R.id.action_cok_begendim) {
-                    // Beğenilen içerik
-                    Map<String, Object> likedData = new HashMap<>();
-                    likedData.put("title", title);
-                    likedData.put("poster_url", posterUrl);
-                    likedData.put("trailer_url", trailerUrl);
-                    likedData.put("timestamp", FieldValue.serverTimestamp()); // zaman sıralaması için
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                    db.collection("likedContent")
-                            .add(likedData)
-                            .addOnSuccessListener(documentReference -> {
-                                Toast.makeText(getContext(), "Beğenildi ve kaydedildi 💖", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(getContext(), "Ekleme başarısız oldu 😢", Toast.LENGTH_SHORT).show();
-                            });
+                // Kullanıcı giriş yapmış mı kontrol et
+                if (user == null) {
+                    Toast.makeText(getContext(), "Lütfen giriş yapın!", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                // Firestore'a veri eklerken error handling ekle
+                if (getArguments() != null) {
+                    String title = getArguments().getString("title");
+                    String trailerUrl = getArguments().getString("trailer_url");
+                    String posterUrl = getArguments().getString("poster_url");
+
+                    // Verilerin null olup olmadığını kontrol et
+                    if (title == null || trailerUrl == null || posterUrl == null) {
+                        Log.e("DetayFragment", "Eksik veri: Title: " + title + ", Trailer: " + trailerUrl + ", Poster: " + posterUrl);
+                        Toast.makeText(getContext(), "Veriler eksik!", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+
+                    // Firebase'ye kaydetme işlemi
+                    if (id == R.id.action_begenmedim) {
+                        Toast.makeText(getContext(), "Beğenmedim seçildi", Toast.LENGTH_SHORT).show();
+                    } else if (id == R.id.action_begendim || id == R.id.action_cok_begendim) {
+                        // Beğenilen içerik
+                        Map<String, Object> likedData = new HashMap<>();
+                        likedData.put("title", title);
+                        likedData.put("poster_url", posterUrl);
+                        likedData.put("trailer_url", trailerUrl);
+                        likedData.put("timestamp", FieldValue.serverTimestamp()); // zaman sıralaması için
+
+                        try {
+                            db.collection("users").document(user.getUid())
+                                    .update("likedList", FieldValue.arrayUnion(likedData)) // likedList içine ekler
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(getContext(), "Beğenildi ve kaydedildi 💖", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("DetayFragment", "Ekleme başarısız oldu", e);
+                                        Toast.makeText(getContext(), "Ekleme başarısız oldu 😢", Toast.LENGTH_SHORT).show();
+                                    });
+                        } catch (Exception e) {
+                            Log.e("DetayFragment", "Veri eklerken hata oluştu", e);
+                            Toast.makeText(getContext(), "Bir hata oluştu!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    Log.e("DetayFragment", "Veri alınamadı, Bundle boş");
+                    Toast.makeText(getContext(), "Veri alınamadı", Toast.LENGTH_SHORT).show();
                 }
 
                 return false;
@@ -79,28 +109,35 @@ public class DetayFragment extends Fragment {
             popup.show();
         });
 
+        // Bundle'dan değerleri alalım
         Bundle args = getArguments();
+        if (args != null) {
+            String title = args.getString("title");
+            String trailerUrl = args.getString("trailer_url");
+            String posterUrl = args.getString("poster_url");
 
-        String title = args.getString("title");
-        String trailerUrl = args.getString("trailer_url");
+            binding.textViewTitle.setText(title);
 
-        binding.textViewTitle.setText(title);
+            if (trailerUrl != null && trailerUrl.contains("v=")) {
+                Uri uri = Uri.parse(trailerUrl);
+                String videoId = uri.getQueryParameter("v");
 
-        if (trailerUrl != null && trailerUrl.contains("v=")) {
-            Uri uri = Uri.parse(trailerUrl);
-            String videoId = uri.getQueryParameter("v");
+                YouTubePlayerView playerView = binding.youtubePlayerView;
+                getLifecycle().addObserver(playerView);
 
-            YouTubePlayerView playerView = binding.youtubePlayerView;
-            getLifecycle().addObserver(playerView);
-
-            playerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
-                @Override
-                public void onReady(@NonNull YouTubePlayer youTubePlayer) {
-                    youTubePlayer.loadVideo(videoId, 0);
-                }
-            });
+                playerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
+                    @Override
+                    public void onReady(@NonNull YouTubePlayer youTubePlayer) {
+                        youTubePlayer.loadVideo(videoId, 0);
+                    }
+                });
+            } else {
+                Log.e("DetayFragment", "Trailer bulunamadı: " + trailerUrl);
+                Toast.makeText(getContext(), "Trailer bulunamadı", Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(getContext(), "Trailer bulunamadı", Toast.LENGTH_SHORT).show();
+            Log.e("DetayFragment", "Bundle boş");
+            Toast.makeText(getContext(), "Veri alınamadı", Toast.LENGTH_SHORT).show();
         }
     }
 

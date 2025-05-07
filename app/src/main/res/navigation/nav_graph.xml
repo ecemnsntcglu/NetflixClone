@@ -59,7 +59,11 @@
         android:id="@+id/searchFragment"
         android:name="com.ecs.netflix.SearchFragment"
         android:label="fragment_search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_search" >
+        <action
+            android:id="@+id/searchToDetay"
+            app:destination="@id/detayFragment" />
+    </fragment>
 
 
     <fragment

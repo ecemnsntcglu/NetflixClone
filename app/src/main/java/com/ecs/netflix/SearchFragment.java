@@ -7,14 +7,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.SearchView;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +28,7 @@ public class SearchFragment extends Fragment {
     private SearchView searchView;
     private RecyclerView recyclerViewMovies, recyclerViewSeries;
     private FirebaseFirestore db;
-    private TextView textViewNoSeriesFound,textViewNoMoviesFound;
+    private TextView textViewNoSeriesFound, textViewNoMoviesFound;
 
     private FilmAdapter filmAdapter;
     private DiziAdapter diziAdapter;
@@ -42,11 +47,26 @@ public class SearchFragment extends Fragment {
         recyclerViewMovies = view.findViewById(R.id.recyclerViewMovies);
         recyclerViewSeries = view.findViewById(R.id.recyclerViewSeries);
 
-        filmAdapter = new FilmAdapter(getContext(), new ArrayList<>(), film ->
-                Toast.makeText(getContext(), "Film seçildi: " + film.getTitle(), Toast.LENGTH_SHORT).show());
+        filmAdapter = new FilmAdapter(getContext(), new ArrayList<>(), film -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("title", film.getTitle());
+            bundle.putString("poster_url", film.getPoster_url());
+            bundle.putString("trailer_url", film.getTrailer_url()); // Trailer URL'yi buraya ekliyoruz
 
-        diziAdapter = new DiziAdapter(getContext(), new ArrayList<>(), dizi ->
-                Toast.makeText(getContext(), "Dizi seçildi: " + dizi.getTitle(), Toast.LENGTH_SHORT).show());
+            NavHostFragment.findNavController(SearchFragment.this)
+                    .navigate(R.id.searchToDetay, bundle);
+        });
+
+        diziAdapter = new DiziAdapter(getContext(), new ArrayList<>(), dizi -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("title", dizi.getTitle());
+            bundle.putString("poster_url", dizi.getPoster_url());
+            bundle.putString("trailer_url", dizi.getTrailer_url()); // Trailer URL'yi buraya ekliyoruz
+
+            NavHostFragment.findNavController(SearchFragment.this)
+                    .navigate(R.id.searchToDetay, bundle);
+        });
+
 
         recyclerViewMovies.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewMovies.setAdapter(filmAdapter);
@@ -58,7 +78,7 @@ public class SearchFragment extends Fragment {
         tumFilmleriGetir();
         tumDizileriGetir();
 
-        // Arama
+        // Arama işlemi
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -125,6 +145,5 @@ public class SearchFragment extends Fragment {
 
         textViewNoSeriesFound.setVisibility(filtreliDiziler.isEmpty() ? View.VISIBLE : View.GONE);
         textViewNoMoviesFound.setVisibility(filtreliFilmler.isEmpty() ? View.VISIBLE : View.GONE);
-
     }
 }
