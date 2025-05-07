@@ -62,12 +62,15 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
                     }
 
                     FilmAdapter filmAdapter = new FilmAdapter(context, filmListesi, selectedFilm -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putString("title", selectedFilm.getTitle());
-                        bundle.putString("poster_url", selectedFilm.getPoster_url());
+                        if (listener != null) {
+                            Bundle bundle = new Bundle();
+                            bundle.putString("title", selectedFilm.getTitle());
+                            bundle.putString("poster_url", selectedFilm.getPoster_url());
+                            bundle.putString("trailer_url", selectedFilm.getTrailer_url());
 
-                        Navigation.findNavController(holder.itemView)
-                                .navigate(R.id.feedToDetay, bundle);
+                            Navigation.findNavController(holder.itemView)
+                                    .navigate(R.id.feedToDetay, bundle);
+                        }
                     });
 
                     holder.diziRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));

@@ -1,12 +1,10 @@
 package com.ecs.netflix;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -43,7 +41,7 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmViewHolder
         holder.binding.textViewDiziAdi.setText(film.getTitle());
 
         Glide.with(context)
-                .load(film.getPoster_url())
+                .load(film.getPoster_url()) // ✅ camelCase!
                 .placeholder(R.drawable.placeholderpic)
                 .error(R.drawable.placeholderpic)
                 .into(holder.binding.imageViewDizi);
