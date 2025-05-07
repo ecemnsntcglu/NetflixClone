@@ -1,6 +1,6 @@
 package com.ecs.netflix;
 
-import android.content.SharedPreferences;
+importandroid.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,7 +56,6 @@ public class FeedFragment extends Fragment {
                 R.color.buton_light;
 
         int borderDrawableId = themePrefManager.isDarkMode() ?
-                R.drawable.buton_border : // bunu şimdi hazırlayacağız
                 R.drawable.buton_border;
         binding.btnOynat.setTextColor(ContextCompat.getColor(requireContext(), textColorId));
         binding.btnListeyeEkle.setTextColor(ContextCompat.getColor(requireContext(), textColorId));
