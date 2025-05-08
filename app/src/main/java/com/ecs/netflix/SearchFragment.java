@@ -1,5 +1,7 @@
 package com.ecs.netflix;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,7 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.SearchView;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
+
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,7 +32,7 @@ public class SearchFragment extends Fragment {
     private RecyclerView recyclerViewMovies, recyclerViewSeries;
     private FirebaseFirestore db;
     private TextView textViewNoSeriesFound, textViewNoMoviesFound;
-
+    private SharedPreferences sharedPreferences;
     private FilmAdapter filmAdapter;
     private DiziAdapter diziAdapter;
     private List<Film> tumFilmler = new ArrayList<>();
@@ -41,37 +44,31 @@ public class SearchFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
         db = FirebaseFirestore.getInstance();
+        sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+
         textViewNoSeriesFound = view.findViewById(R.id.textViewNoSeriesFound);
         textViewNoMoviesFound = view.findViewById(R.id.textViewNoMoviesFound);
         searchView = view.findViewById(R.id.searchView);
         recyclerViewMovies = view.findViewById(R.id.recyclerViewMovies);
         recyclerViewSeries = view.findViewById(R.id.recyclerViewSeries);
 
-        filmAdapter = new FilmAdapter(getContext(), new ArrayList<>(), film -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("title", film.getTitle());
-            bundle.putString("poster_url", film.getPoster_url());
-            bundle.putString("trailer_url", film.getTrailer_url()); // Trailer URL'yi buraya ekliyoruz
-
-            NavHostFragment.findNavController(SearchFragment.this)
-                    .navigate(R.id.searchToDetay, bundle);
+        filmAdapter = new FilmAdapter(getContext(), new ArrayList<>(), selectedFilmId -> {
+            sharedPreferences.edit().putString("contentType", "Film").apply();
+            NavDirections action = SearchFragmentDirections.searchToDetay(selectedFilmId);
+            NavHostFragment.findNavController(SearchFragment.this).navigate(action);
         });
 
-        diziAdapter = new DiziAdapter(getContext(), new ArrayList<>(), dizi -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("title", dizi.getTitle());
-            bundle.putString("poster_url", dizi.getPoster_url());
-            bundle.putString("trailer_url", dizi.getTrailer_url()); // Trailer URL'yi buraya ekliyoruz
-
-            NavHostFragment.findNavController(SearchFragment.this)
-                    .navigate(R.id.searchToDetay, bundle);
+        diziAdapter = new DiziAdapter(getContext(), new ArrayList<>(), selectedDiziId -> {
+            sharedPreferences.edit().putString("contentType", "Dizi").apply();
+            NavDirections action = SearchFragmentDirections.searchToDetay(selectedDiziId);
+            NavHostFragment.findNavController(SearchFragment.this).navigate(action);
         });
 
-
-        recyclerViewMovies.setLayoutManager(new LinearLayoutManager(getContext()));
+        // 🔥 GridLayoutManager ile öğeleri yatayda sıralıyoruz (2 sütun olacak)
+        recyclerViewMovies.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerViewMovies.setAdapter(filmAdapter);
 
-        recyclerViewSeries.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerViewSeries.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerViewSeries.setAdapter(diziAdapter);
 
         // Verileri yükle
@@ -96,32 +93,46 @@ public class SearchFragment extends Fragment {
         return view;
     }
 
+
+
     private void tumFilmleriGetir() {
         db.collection("movies")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    tumFilmler.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        Film film = doc.toObject(Film.class);
-                        tumFilmler.add(film);
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        Log.e("Firestore", "Film verileri alınamadı!", e);
+                        return;
                     }
-                    filmAdapter.setFilmListesi(tumFilmler); // Tümü yüklensin
-                })
-                .addOnFailureListener(e -> Log.e("Firestore", "Film verileri alınamadı!", e));
+
+                    if (queryDocumentSnapshots != null) {
+                        tumFilmler.clear();
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            Film film = doc.toObject(Film.class);
+                            film.setId(doc.getId()); // Firestore'daki belge ID'sini ekle
+                            tumFilmler.add(film);
+                        }
+                        filmAdapter.setFilmListesi(tumFilmler);
+                    }
+                });
     }
 
     private void tumDizileriGetir() {
         db.collection("series")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    tumDiziler.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        Dizi dizi = doc.toObject(Dizi.class);
-                        tumDiziler.add(dizi);
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        Log.e("Firestore", "Dizi verileri alınamadı!", e);
+                        return;
                     }
-                    diziAdapter.setDiziListesi(tumDiziler); // Tümü yüklensin
-                })
-                .addOnFailureListener(e -> Log.e("Firestore", "Dizi verileri alınamadı!", e));
+
+                    if (queryDocumentSnapshots != null) {
+                        tumDiziler.clear();
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            Dizi dizi = doc.toObject(Dizi.class);
+                            dizi.setId(doc.getId()); // Firestore'daki belge ID'sini ekle
+                            tumDiziler.add(dizi);
+                        }
+                        diziAdapter.setDiziListesi(tumDiziler);
+                    }
+                });
     }
 
     private void filtrele(String query) {

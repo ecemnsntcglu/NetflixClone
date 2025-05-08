@@ -1,5 +1,7 @@
 package com.ecs.netflix;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +31,9 @@ import java.util.Map;
 public class DetayFragment extends Fragment {
 
     private FragmentDetayBinding binding;
+    private SharedPreferences sharedPreferences;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,6 +45,91 @@ public class DetayFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // SharedPreferences başlat
+        sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+
+        // Firebase başlat
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        // İçerik ID ve türünü al
+        Bundle args = getArguments();
+        if (args == null) {
+            Toast.makeText(getContext(), "İçerik bilgisi bulunamadı!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String contentId = args.getString("contentId"); // İçeriğin ID'si
+        String contentType = sharedPreferences.getString("contentType", null); // İçeriğin türü (movie veya series)
+
+        if (contentId == null || contentType == null) {
+            Toast.makeText(getContext(), "İçerik ID veya türü eksik!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Firestore'dan içeriği çek
+        db.collection(contentType.equals("Film") ? "movies" : "series")
+                .document(contentId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // İçeriği nesneye dönüştür
+                        if (contentType.equals("Film")) {
+                            Film film = documentSnapshot.toObject(Film.class);
+                            if (film != null) {
+                                film.setId(documentSnapshot.getId());
+                                updateUIWithFilm(film);
+                            }
+                        } else {
+                            Dizi dizi = documentSnapshot.toObject(Dizi.class);
+                            if (dizi != null) {
+                                dizi.setId(documentSnapshot.getId());
+                                updateUIWithDizi(dizi);
+                            }
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "İçerik bulunamadı!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Veri çekme hatası!", Toast.LENGTH_SHORT).show();
+                });
+
+        // Puan verme işlemi
+        setupRatingMenu(view);
+    }
+
+    private void updateUIWithFilm(Film film) {
+        binding.textViewTitle.setText(film.getTitle());
+        loadTrailer(film.getTrailer_url());
+    }
+
+    private void updateUIWithDizi(Dizi dizi) {
+        binding.textViewTitle.setText(dizi.getTitle());
+        loadTrailer(dizi.getTrailer_url());
+    }
+
+    private void loadTrailer(String trailerUrl) {
+        if (trailerUrl != null && trailerUrl.contains("v=")) {
+            Uri uri = Uri.parse(trailerUrl);
+            String videoId = uri.getQueryParameter("v");
+
+            YouTubePlayerView playerView = binding.youtubePlayerView;
+            getLifecycle().addObserver(playerView);
+
+            playerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
+                @Override
+                public void onReady(@NonNull YouTubePlayer youTubePlayer) {
+                    youTubePlayer.loadVideo(videoId, 0);
+                }
+            });
+        } else {
+            Log.e("DetayFragment", "Trailer bulunamadı: " + trailerUrl);
+            Toast.makeText(getContext(), "Trailer bulunamadı", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupRatingMenu(View view) {
         ImageView imageRate = view.findViewById(R.id.imageRate);
 
         imageRate.setOnClickListener(v -> {
@@ -49,58 +139,10 @@ public class DetayFragment extends Fragment {
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
 
-                // Firebase işlemi
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                // Kullanıcı giriş yapmış mı kontrol et
-                if (user == null) {
-                    Toast.makeText(getContext(), "Lütfen giriş yapın!", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-
-                // Firestore'a veri eklerken error handling ekle
-                if (getArguments() != null) {
-                    String title = getArguments().getString("title");
-                    String trailerUrl = getArguments().getString("trailer_url");
-                    String posterUrl = getArguments().getString("poster_url");
-
-                    // Verilerin null olup olmadığını kontrol et
-                    if (title == null || trailerUrl == null || posterUrl == null) {
-                        Log.e("DetayFragment", "Eksik veri: Title: " + title + ", Trailer: " + trailerUrl + ", Poster: " + posterUrl);
-                        Toast.makeText(getContext(), "Veriler eksik!", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-
-                    // Firebase'ye kaydetme işlemi
-                    if (id == R.id.action_begenmedim) {
-                        Toast.makeText(getContext(), "Beğenmedim seçildi", Toast.LENGTH_SHORT).show();
-                    } else if (id == R.id.action_begendim || id == R.id.action_cok_begendim) {
-                        // Beğenilen içerik
-                        Map<String, Object> likedData = new HashMap<>();
-                        likedData.put("title", title);
-                        likedData.put("poster_url", posterUrl);
-                        likedData.put("trailer_url", trailerUrl);
-                        likedData.put("timestamp", FieldValue.serverTimestamp()); // zaman sıralaması için
-
-                        try {
-                            db.collection("users").document(user.getUid())
-                                    .update("likedList", FieldValue.arrayUnion(likedData)) // likedList içine ekler
-                                    .addOnSuccessListener(aVoid -> {
-                                        Toast.makeText(getContext(), "Beğenildi ve kaydedildi 💖", Toast.LENGTH_SHORT).show();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Log.e("DetayFragment", "Ekleme başarısız oldu", e);
-                                        Toast.makeText(getContext(), "Ekleme başarısız oldu 😢", Toast.LENGTH_SHORT).show();
-                                    });
-                        } catch (Exception e) {
-                            Log.e("DetayFragment", "Veri eklerken hata oluştu", e);
-                            Toast.makeText(getContext(), "Bir hata oluştu!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                } else {
-                    Log.e("DetayFragment", "Veri alınamadı, Bundle boş");
-                    Toast.makeText(getContext(), "Veri alınamadı", Toast.LENGTH_SHORT).show();
+                if (id == R.id.action_begenmedim) {
+                    Toast.makeText(getContext(), "Beğenmedim seçildi", Toast.LENGTH_SHORT).show();
+                } else if (id == R.id.action_begendim || id == R.id.action_cok_begendim) {
+                    addToLikedList();
                 }
 
                 return false;
@@ -108,37 +150,42 @@ public class DetayFragment extends Fragment {
 
             popup.show();
         });
+    }
 
-        // Bundle'dan değerleri alalım
-        Bundle args = getArguments();
-        if (args != null) {
-            String title = args.getString("title");
-            String trailerUrl = args.getString("trailer_url");
-            String posterUrl = args.getString("poster_url");
-
-            binding.textViewTitle.setText(title);
-
-            if (trailerUrl != null && trailerUrl.contains("v=")) {
-                Uri uri = Uri.parse(trailerUrl);
-                String videoId = uri.getQueryParameter("v");
-
-                YouTubePlayerView playerView = binding.youtubePlayerView;
-                getLifecycle().addObserver(playerView);
-
-                playerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
-                    @Override
-                    public void onReady(@NonNull YouTubePlayer youTubePlayer) {
-                        youTubePlayer.loadVideo(videoId, 0);
-                    }
-                });
-            } else {
-                Log.e("DetayFragment", "Trailer bulunamadı: " + trailerUrl);
-                Toast.makeText(getContext(), "Trailer bulunamadı", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Log.e("DetayFragment", "Bundle boş");
-            Toast.makeText(getContext(), "Veri alınamadı", Toast.LENGTH_SHORT).show();
+    private void addToLikedList() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Kullanıcı oturumu açık değil!", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        String userId = user.getUid();
+        Bundle args = getArguments();
+        if (args == null) {
+            Toast.makeText(getContext(), "İçerik bilgisi bulunamadı!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String contentId = args.getString("contentId");
+        String contentType = sharedPreferences.getString("contentType", null);
+
+        if (contentId == null || contentType == null) {
+            Toast.makeText(getContext(), "İçerik ID veya türü eksik!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> likedListEntry = new HashMap<>();
+        likedListEntry.put("ID", contentId);
+        likedListEntry.put("type", contentType);
+
+        db.collection("users").document(userId)
+                .update("likedlist", FieldValue.arrayUnion(likedListEntry))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Beğenildi ve listeye eklendi 💖", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Listeye ekleme başarısız oldu 😢", Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override

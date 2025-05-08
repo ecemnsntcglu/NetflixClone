@@ -18,13 +18,8 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
     private List<Dizi> diziListesi;
     private OnItemClickListener listener;
 
-    public void setDiziListesi(List<Dizi> filtreliDiziler) {
-        this.diziListesi = filtreliDiziler;
-        notifyDataSetChanged();
-    }
-
     public interface OnItemClickListener {
-        void onItemClick(Dizi dizi);
+        void onItemClick(String id); // 🔥 Artık sadece ID alıyor
     }
 
     public DiziAdapter(Context context, List<Dizi> diziListesi, OnItemClickListener listener) {
@@ -33,10 +28,15 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
         this.listener = listener;
     }
 
+    public void setDiziListesi(List<Dizi> yeniDiziListesi) {
+        this.diziListesi = yeniDiziListesi;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public DiziViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemChildBinding binding = ItemChildBinding.inflate(LayoutInflater.from(context), parent, false);
+        ItemChildBinding binding = ItemChildBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
         return new DiziViewHolder(binding);
     }
 
@@ -45,23 +45,23 @@ public class DiziAdapter extends RecyclerView.Adapter<DiziAdapter.DiziViewHolder
         Dizi dizi = diziListesi.get(position);
         holder.binding.textViewDiziAdi.setText(dizi.getTitle());
 
-        Glide.with(context)
+        Glide.with(holder.itemView.getContext())
                 .load(dizi.getPoster_url())
                 .placeholder(R.drawable.placeholderpic)
                 .error(R.drawable.placeholderpic)
                 .into(holder.binding.imageViewDizi);
 
-        // Tıklama işlemi
+        // Tıklama işlemi (Sadece ID taşınıyor)
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onItemClick(dizi); // Burada item tıklama işlemi tetikleniyor
+                listener.onItemClick(dizi.getId()); // 🔥 Artık hata vermeyecek
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return diziListesi.size();
+        return (diziListesi != null) ? diziListesi.size() : 0;
     }
 
     public static class DiziViewHolder extends RecyclerView.ViewHolder {

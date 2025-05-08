@@ -24,15 +24,17 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
 
     private Context context;
     private List<Kategori> kategoriListesi;
-    private DiziAdapter.OnItemClickListener listener;
+    private DiziAdapter.OnItemClickListener diziListener;
+    private FilmAdapter.OnItemClickListener filmListener;
 
-
-    public KategoriAdapter(Context context, List<Kategori> kategoriListesi, DiziAdapter.OnItemClickListener listener) {
+    public KategoriAdapter(Context context, List<Kategori> kategoriListesi,
+                           DiziAdapter.OnItemClickListener diziListener,
+                           FilmAdapter.OnItemClickListener filmListener) {
         this.context = context;
         this.kategoriListesi = kategoriListesi;
-        this.listener = listener;
+        this.diziListener = diziListener;
+        this.filmListener = filmListener;
     }
-
 
     @NonNull
     @Override
@@ -52,21 +54,20 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         if (contentType.equals("Film")) {
-            // 🔥 Film Listesi (DEĞİŞMEDİ)
+            // 🔥 Film Listesi (ID EKLENDİ)
             List<Film> filmListesi = new ArrayList<>();
             db.collection("movies").whereArrayContains("genres", kategori.getKategoriAdi()).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Film film = document.toObject(Film.class);
+                        film.setId(document.getId()); // Firestore'daki belge ID'sini ekle
                         filmListesi.add(film);
                     }
 
-                    FilmAdapter filmAdapter = new FilmAdapter(context, filmListesi, selectedFilm -> {
-                        if (listener != null) {
+                    FilmAdapter filmAdapter = new FilmAdapter(context, filmListesi, selectedFilmId -> {
+                        if (filmListener != null) {
                             Bundle bundle = new Bundle();
-                            bundle.putString("title", selectedFilm.getTitle());
-                            bundle.putString("poster_url", selectedFilm.getPoster_url());
-                            bundle.putString("trailer_url", selectedFilm.getTrailer_url());
+                            bundle.putString("contentId", selectedFilmId); // 🔥 Sadece ID taşınıyor
 
                             Navigation.findNavController(holder.itemView)
                                     .navigate(R.id.feedToDetay, bundle);
@@ -75,32 +76,31 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
 
                     holder.diziRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
                     holder.diziRecyclerView.setAdapter(filmAdapter);
-
+                    filmAdapter.notifyDataSetChanged(); // 🔥 RecyclerView güncellendi
                 }
             });
         } else {
-            // 🔥 Dizi Listesi (TIKLAMA EKLENDİ)
+            // 🔥 Dizi Listesi (ID EKLENDİ)
             List<Dizi> diziListesi = new ArrayList<>();
             db.collection("series").whereArrayContains("genres", kategori.getKategoriAdi()).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Dizi dizi = document.toObject(Dizi.class);
+                        dizi.setId(document.getId()); // Firestore'daki belge ID'sini ekle
                         diziListesi.add(dizi);
                     }
 
-                    DiziAdapter diziAdapter = new DiziAdapter(context, diziListesi, selectedDizi -> {
+                    DiziAdapter diziAdapter = new DiziAdapter(context, diziListesi, selectedDiziId -> {
                         Bundle bundle = new Bundle();
-                        bundle.putString("title", selectedDizi.getTitle());
-                        bundle.putString("poster_url", selectedDizi.getPoster_url());  // 🔄 düzeltildi
-                        bundle.putString("trailer_url", selectedDizi.getTrailer_url()); // ✅ EKLENDİ
+                        bundle.putString("contentId", selectedDiziId); // 🔥 Sadece ID taşınıyor
 
                         Navigation.findNavController(holder.itemView)
                                 .navigate(R.id.feedToDetay, bundle);
                     });
 
-
                     holder.diziRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
                     holder.diziRecyclerView.setAdapter(diziAdapter);
+                    diziAdapter.notifyDataSetChanged(); // 🔥 RecyclerView güncellendi
                 }
             });
         }
