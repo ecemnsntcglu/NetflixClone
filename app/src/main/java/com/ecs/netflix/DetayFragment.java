@@ -26,6 +26,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DetayFragment extends Fragment {
@@ -60,33 +61,60 @@ public class DetayFragment extends Fragment {
         }
 
         String contentId = args.getString("contentId"); // İçeriğin ID'si
-        String contentType = sharedPreferences.getString("contentType", null); // İçeriğin türü (movie veya series)
+        String contentType = sharedPreferences.getString("contentType", null); // İçeriğin türü (Film veya Dizi)
 
         if (contentId == null || contentType == null) {
             Toast.makeText(getContext(), "İçerik ID veya türü eksik!", Toast.LENGTH_SHORT).show();
             return;
         }
+        binding.textViewCast.setOnClickListener(v -> {
+            if (binding.textViewCast.getMaxLines() == 2) {
+                binding.textViewCast.setMaxLines(10); // 🔥 Açıklamanın tamamını göster
+            } else {
+                binding.textViewCast.setMaxLines(2); // 🔥 Eski haline döndür
+            }
+        });
+        binding.textViewDescription.setOnClickListener(v -> {
+            if (binding.textViewDescription.getMaxLines() == 3) {
+                binding.textViewDescription.setMaxLines(10); // 🔥 Açıklamanın tamamını göster
+            } else {
+                binding.textViewDescription.setMaxLines(3); // 🔥 Eski haline döndür
+            }
+        });
 
         // Firestore'dan içeriği çek
-        db.collection(contentType.equals("Film") ? "movies" : "series")
-                .document(contentId)
+        fetchContent(contentId, contentType);
+
+        // Puan verme işlemi
+        setupRatingMenu(view);
+    }
+
+    private void fetchContent(String contentId, String contentType) {
+        String collectionName = contentType.equals("Film") ? "movies" : "series";
+
+        db.collection(collectionName).document(contentId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // İçeriği nesneye dönüştür
-                        if (contentType.equals("Film")) {
-                            Film film = documentSnapshot.toObject(Film.class);
-                            if (film != null) {
-                                film.setId(documentSnapshot.getId());
-                                updateUIWithFilm(film);
-                            }
+                        String title = documentSnapshot.getString("title");
+                        String trailerUrl = documentSnapshot.getString("trailer_url");
+                        String description = documentSnapshot.getString("description");
+                        String director = documentSnapshot.getString("director");
+                        List<String> castList = (List<String>) documentSnapshot.get("cast");
+
+                        binding.textViewTitle.setText(title != null ? title : "Başlık bulunamadı");
+                        binding.textViewDescription.setText(description != null ? description : "Açıklama bulunamadı");
+
+                        // 🔥 Yönetmen ve oyuncu bilgilerini ekrana yaz
+                        String castText = "Yönetmen: " + (director != null ? director : "Bilinmiyor") + "\nOyuncular: ";
+                        if (castList != null && !castList.isEmpty()) {
+                            castText += String.join(", ", castList);
                         } else {
-                            Dizi dizi = documentSnapshot.toObject(Dizi.class);
-                            if (dizi != null) {
-                                dizi.setId(documentSnapshot.getId());
-                                updateUIWithDizi(dizi);
-                            }
+                            castText += "Bilinmiyor";
                         }
+                        binding.textViewCast.setText(castText);
+
+                        loadTrailer(trailerUrl);
                     } else {
                         Toast.makeText(getContext(), "İçerik bulunamadı!", Toast.LENGTH_SHORT).show();
                     }
@@ -94,39 +122,47 @@ public class DetayFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Veri çekme hatası!", Toast.LENGTH_SHORT).show();
                 });
-
-        // Puan verme işlemi
-        setupRatingMenu(view);
-    }
-
-    private void updateUIWithFilm(Film film) {
-        binding.textViewTitle.setText(film.getTitle());
-        loadTrailer(film.getTrailer_url());
-    }
-
-    private void updateUIWithDizi(Dizi dizi) {
-        binding.textViewTitle.setText(dizi.getTitle());
-        loadTrailer(dizi.getTrailer_url());
     }
 
     private void loadTrailer(String trailerUrl) {
-        if (trailerUrl != null && trailerUrl.contains("v=")) {
-            Uri uri = Uri.parse(trailerUrl);
-            String videoId = uri.getQueryParameter("v");
+        if (trailerUrl != null) {
+            String videoId = extractYouTubeVideoId(trailerUrl);
 
-            YouTubePlayerView playerView = binding.youtubePlayerView;
-            getLifecycle().addObserver(playerView);
+            if (videoId != null) {
+                YouTubePlayerView playerView = binding.youtubePlayerView;
+                getLifecycle().addObserver(playerView);
 
-            playerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
-                @Override
-                public void onReady(@NonNull YouTubePlayer youTubePlayer) {
-                    youTubePlayer.loadVideo(videoId, 0);
-                }
-            });
+                playerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
+                    @Override
+                    public void onReady(@NonNull YouTubePlayer youTubePlayer) {
+                        youTubePlayer.loadVideo(videoId, 0);
+                    }
+                });
+            } else {
+                Log.e("DetayFragment", "Geçersiz YouTube URL: " + trailerUrl);
+                Toast.makeText(getContext(), "Fragman oynatılamıyor, geçersiz bağlantı!", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Log.e("DetayFragment", "Trailer bulunamadı: " + trailerUrl);
             Toast.makeText(getContext(), "Trailer bulunamadı", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private String extractYouTubeVideoId(String url) {
+        String videoId = null;
+
+        try {
+            Uri uri = Uri.parse(url);
+            if (url.contains("youtube.com/watch")) {
+                videoId = uri.getQueryParameter("v"); // Normal YouTube linki
+            } else if (url.contains("youtu.be/")) {
+                videoId = uri.getLastPathSegment(); // Kısa YouTube linki
+            }
+        } catch (Exception e) {
+            Log.e("DetayFragment", "YouTube Video ID çıkarılamadı!", e);
+        }
+
+        return videoId;
     }
 
     private void setupRatingMenu(View view) {

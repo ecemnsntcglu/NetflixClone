@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.ecs.netflix.databinding.FragmentFeedBinding;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.MemoryCacheSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -30,7 +29,7 @@ public class FeedFragment extends Fragment {
     private KategoriAdapter kategoriAdapter;
     private List<Kategori> kategoriler;
     private SharedPreferences sharedPreferences;
-
+    private FirebaseFirestore db;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,9 +38,9 @@ public class FeedFragment extends Fragment {
         sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
 
         // 🔥 Firestore başlat ve yeni önbellek ayarlarını uygula
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-                .setLocalCacheSettings(MemoryCacheSettings.newBuilder().build()) // 🔥 Yeni önbellek yönetimi
+                .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED) // 🔥 Önbellek sınırını kaldır
                 .build();
         db.setFirestoreSettings(settings);
     }
@@ -61,16 +60,16 @@ public class FeedFragment extends Fragment {
 
         // Kategori listesi oluştur
         kategoriler = new ArrayList<>();
-        kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler,
-                selectedDiziId -> {
-                    NavDirections action = FeedFragmentDirections.feedToDetay(selectedDiziId);
-                    NavHostFragment.findNavController(FeedFragment.this).navigate(action);
-                },
-                selectedFilmId -> {
-                    NavDirections action = FeedFragmentDirections.feedToDetay(selectedFilmId);
-                    NavHostFragment.findNavController(FeedFragment.this).navigate(action);
-                }
-        );
+        kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler, new ContentAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(String contentId, String type) {
+                SharedPreferences sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                sharedPreferences.edit().putString("contentType", type).apply();
+
+                NavDirections action = FeedFragmentDirections.feedToDetay(contentId);
+                NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            }
+        });
 
         binding.parentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.parentRecyclerView.setAdapter(kategoriAdapter);
@@ -108,20 +107,14 @@ public class FeedFragment extends Fragment {
     }
 
     private void kategorileriAl(String contentType) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         String collectionName = contentType.equals("Film") ? "movies" : "series";
 
-        db.collection(collectionName).addSnapshotListener((queryDocumentSnapshots, e) -> {
-            if (e != null) {
-                System.out.println("Firestore'dan veri çekme hatası: " + e.getMessage());
-                return;
-            }
-
-            if (queryDocumentSnapshots != null) {
+        db.collection(collectionName).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
                 kategoriler.clear();
                 List<String> tumTurler = new ArrayList<>();
 
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
                     List<String> genres = (List<String>) document.get("genres");
                     if (genres != null) {
                         for (String genre : genres) {
@@ -137,6 +130,8 @@ public class FeedFragment extends Fragment {
                 }
 
                 kategoriAdapter.notifyDataSetChanged();
+            } else {
+                System.out.println("Firestore'dan veri çekme hatası: " + (task.getException() != null ? task.getException().getMessage() : "Bilinmeyen hata"));
             }
         });
     }

@@ -32,6 +32,10 @@
             app:destination="@id/kullaniciFragment"
             app:popUpTo="@id/kullaniciFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/accountToDetay"
+            app:destination="@id/detayFragment"
+            />
 
     </fragment>
 

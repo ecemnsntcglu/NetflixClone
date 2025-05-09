@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -24,16 +23,12 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
 
     private Context context;
     private List<Kategori> kategoriListesi;
-    private DiziAdapter.OnItemClickListener diziListener;
-    private FilmAdapter.OnItemClickListener filmListener;
+    private ContentAdapter.OnItemClickListener contentListener;
 
-    public KategoriAdapter(Context context, List<Kategori> kategoriListesi,
-                           DiziAdapter.OnItemClickListener diziListener,
-                           FilmAdapter.OnItemClickListener filmListener) {
+    public KategoriAdapter(Context context, List<Kategori> kategoriListesi, ContentAdapter.OnItemClickListener contentListener) {
         this.context = context;
         this.kategoriListesi = kategoriListesi;
-        this.diziListener = diziListener;
-        this.filmListener = filmListener;
+        this.contentListener = contentListener;
     }
 
     @NonNull
@@ -52,58 +47,42 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
         String contentType = sharedPreferences.getString("contentType", "Dizi");
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        List<Content> contentList = new ArrayList<>();
 
-        if (contentType.equals("Film")) {
-            // 🔥 Film Listesi (ID EKLENDİ)
-            List<Film> filmListesi = new ArrayList<>();
-            db.collection("movies").whereArrayContains("genres", kategori.getKategoriAdi()).get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Film film = document.toObject(Film.class);
-                        film.setId(document.getId()); // Firestore'daki belge ID'sini ekle
-                        filmListesi.add(film);
-                    }
+        // 🔥 Hem `movies` hem `series` koleksiyonlarını çek
+        fetchContent(db, "movies", kategori.getKategoriAdi(), "Film", contentList, holder);
+        fetchContent(db, "series", kategori.getKategoriAdi(), "Dizi", contentList, holder);
+    }
 
-                    FilmAdapter filmAdapter = new FilmAdapter(context, filmListesi, selectedFilmId -> {
-                        if (filmListener != null) {
-                            Bundle bundle = new Bundle();
-                            bundle.putString("contentId", selectedFilmId); // 🔥 Sadece ID taşınıyor
-
-                            Navigation.findNavController(holder.itemView)
-                                    .navigate(R.id.feedToDetay, bundle);
-                        }
-                    });
-
-                    holder.diziRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
-                    holder.diziRecyclerView.setAdapter(filmAdapter);
-                    filmAdapter.notifyDataSetChanged(); // 🔥 RecyclerView güncellendi
+    private void fetchContent(FirebaseFirestore db, String collectionName, String genre, String type, List<Content> contentList, KategoriViewHolder holder) {
+        db.collection(collectionName).whereArrayContains("genres", genre).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Content content = new Content(
+                            document.getId(),
+                            document.getString("title"),
+                            document.getString("poster_url"),
+                            type
+                    );
+                    contentList.add(content);
                 }
-            });
-        } else {
-            // 🔥 Dizi Listesi (ID EKLENDİ)
-            List<Dizi> diziListesi = new ArrayList<>();
-            db.collection("series").whereArrayContains("genres", kategori.getKategoriAdi()).get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Dizi dizi = document.toObject(Dizi.class);
-                        dizi.setId(document.getId()); // Firestore'daki belge ID'sini ekle
-                        diziListesi.add(dizi);
-                    }
 
-                    DiziAdapter diziAdapter = new DiziAdapter(context, diziListesi, selectedDiziId -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putString("contentId", selectedDiziId); // 🔥 Sadece ID taşınıyor
+                ContentAdapter contentAdapter = new ContentAdapter(context, contentList, (contentId, contentType) -> {
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                    sharedPreferences.edit().putString("contentType", contentType).apply();
 
-                        Navigation.findNavController(holder.itemView)
-                                .navigate(R.id.feedToDetay, bundle);
-                    });
+                    Bundle bundle = new Bundle();
+                    bundle.putString("contentId", contentId);
 
-                    holder.diziRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
-                    holder.diziRecyclerView.setAdapter(diziAdapter);
-                    diziAdapter.notifyDataSetChanged(); // 🔥 RecyclerView güncellendi
-                }
-            });
-        }
+                    Navigation.findNavController(holder.itemView)
+                            .navigate(R.id.feedToDetay, bundle);
+                });
+
+                holder.contentRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
+                holder.contentRecyclerView.setAdapter(contentAdapter);
+                contentAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -113,12 +92,12 @@ public class KategoriAdapter extends RecyclerView.Adapter<KategoriAdapter.Katego
 
     public static class KategoriViewHolder extends RecyclerView.ViewHolder {
         TextView kategoriText;
-        RecyclerView diziRecyclerView;
+        RecyclerView contentRecyclerView;
 
         public KategoriViewHolder(@NonNull View itemView) {
             super(itemView);
             kategoriText = itemView.findViewById(R.id.txtKategori);
-            diziRecyclerView = itemView.findViewById(R.id.recyclerChild);
+            contentRecyclerView = itemView.findViewById(R.id.recyclerChild);
         }
     }
 }

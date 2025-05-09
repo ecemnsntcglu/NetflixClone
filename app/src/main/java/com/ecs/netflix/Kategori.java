@@ -4,26 +4,26 @@ import java.util.List;
 
 public class Kategori {
     private String kategoriAdi;
-    private List<Dizi> diziListesi; // Firestore'daki dizileri liste olarak sakla
+    private List<Content> contentList; // 🔥 Artık `Dizi` yerine `Content` nesnesi kullanılıyor
 
     public Kategori() {
         // Firebase için boş constructor gerekli
     }
 
-    public Kategori(String kategoriAdi, List<Dizi> diziListesi) {
+    public Kategori(String kategoriAdi, List<Content> contentList) {
         this.kategoriAdi = kategoriAdi;
-        this.diziListesi = diziListesi;
+        this.contentList = contentList;
     }
 
     public String getKategoriAdi() {
         return kategoriAdi;
     }
 
-    public List<Dizi> getDiziListesi() {
-        return diziListesi;
+    public List<Content> getContentList() {
+        return contentList;
     }
 
-    public void setDiziListesi(List<Dizi> diziListesi) {
-        this.diziListesi = diziListesi;
+    public void setContentList(List<Content> contentList) {
+        this.contentList = contentList;
     }
 }

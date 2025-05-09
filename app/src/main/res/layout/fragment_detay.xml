@@ -13,7 +13,6 @@
         android:padding="16dp">
 
         <!-- Trailer Görseli -->
-
         <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
             android:id="@+id/youtubePlayerView"
             android:layout_width="match_parent"
@@ -80,7 +79,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/non_fav_btn"
-                android:contentDescription="Favorilere Ekle"/>
+                    android:contentDescription="Favorilere Ekle"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -117,6 +116,30 @@
             </LinearLayout>
 
         </LinearLayout>
+        <TextView
+            android:id="@+id/textViewCast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Burada cast metni olacak."
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center_horizontal"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+        <!-- Açıklama (Description) -->
+        <TextView
+            android:id="@+id/textViewDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Burada açıklama metni olacak."
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center_horizontal"
+            android:maxLines="3"
+            android:ellipsize="end"/>
+
 
         <!-- Bölümler Başlığı -->
         <TextView
