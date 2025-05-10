@@ -81,6 +81,9 @@ public class DetayFragment extends Fragment {
                 binding.textViewDescription.setMaxLines(3); // 🔥 Eski haline döndür
             }
         });
+        binding.imageFav.setOnClickListener(v -> {
+           addToList("favorites");
+        });
 
         // Firestore'dan içeriği çek
         fetchContent(contentId, contentType);
@@ -178,7 +181,7 @@ public class DetayFragment extends Fragment {
                 if (id == R.id.action_begenmedim) {
                     Toast.makeText(getContext(), "Beğenmedim seçildi", Toast.LENGTH_SHORT).show();
                 } else if (id == R.id.action_begendim || id == R.id.action_cok_begendim) {
-                    addToLikedList();
+                    addToList("likedlist");
                 }
 
                 return false;
@@ -188,7 +191,7 @@ public class DetayFragment extends Fragment {
         });
     }
 
-    private void addToLikedList() {
+    private void addToList(String listType) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
             Toast.makeText(getContext(), "Kullanıcı oturumu açık değil!", Toast.LENGTH_SHORT).show();
@@ -210,20 +213,25 @@ public class DetayFragment extends Fragment {
             return;
         }
 
-        Map<String, Object> likedListEntry = new HashMap<>();
-        likedListEntry.put("ID", contentId);
-        likedListEntry.put("type", contentType);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // 🔥 İçeriği eklemek için veri oluştur
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("ID", contentId);
+        entry.put("type", contentType);
 
         db.collection("users").document(userId)
-                .update("likedlist", FieldValue.arrayUnion(likedListEntry))
+                .update(listType, FieldValue.arrayUnion(entry))
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Beğenildi ve listeye eklendi 💖", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), listType.equals("favorites") ? "Favorilere eklendi ❤️" : "Beğenildi ve listeye eklendi 💖", Toast.LENGTH_SHORT).show();
+               if(listType.equals("favorites") ) {
+                   binding.imageFav.setImageResource(R.drawable.fav_btn);
+               }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Listeye ekleme başarısız oldu 😢", Toast.LENGTH_SHORT).show();
                 });
     }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
