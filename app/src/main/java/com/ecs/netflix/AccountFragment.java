@@ -1,11 +1,14 @@
 package com.ecs.netflix;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -20,6 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +52,8 @@ public class AccountFragment extends Fragment {
         loadUserInfo();
 
         // Beğenilen içerikleri yükle
-        loadLikedContent();
+        loadContent("likedlist");
+        loadContent("favorites");
 
         // Çıkış yap butonu
         binding.btnCikis.setOnClickListener(v -> {
@@ -59,7 +64,7 @@ public class AccountFragment extends Fragment {
             NavDirections action = AccountFragmentDirections.accountToKullanici();
             NavHostFragment.findNavController(AccountFragment.this).navigate(action);
         });
-
+        binding.btnBilgileriGuncelle.setOnClickListener(v -> showEditUserDialog());
         // 🌙 Tema değiştirme butonu
         ThemePrefManager themePrefManager = new ThemePrefManager(requireContext());
         binding.switchTema.setOnClickListener(v -> {
@@ -91,7 +96,7 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    private void loadLikedContent() {
+    private void loadContent(String listType) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Toast.makeText(getContext(), "Kullanıcı oturumu açık değil!", Toast.LENGTH_SHORT).show();
@@ -99,10 +104,10 @@ public class AccountFragment extends Fragment {
         }
 
         String userId = user.getUid();
-        likedList = new ArrayList<>();
+        List<Content> contentList = new ArrayList<>();
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
 
-        contentAdapter = new ContentAdapter(requireContext(), likedList, (contentId, type) -> {
+        contentAdapter = new ContentAdapter(requireContext(), contentList, (contentId, type) -> {
             // 🔥 Seçilen içeriğe göre `SharedPreferences` güncelle
             sharedPreferences.edit().putString("contentType", type).apply();
 
@@ -111,34 +116,40 @@ public class AccountFragment extends Fragment {
             NavHostFragment.findNavController(AccountFragment.this).navigate(action);
         });
 
-        binding.recyclerViewLiked.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.recyclerViewLiked.setAdapter(contentAdapter);
+        // 🔥 Parametreye göre doğru RecyclerView seç
+        if (listType.equals("favorites")) {
+            binding.recyclerViewFav.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            binding.recyclerViewFav.setAdapter(contentAdapter);
+        } else {
+            binding.recyclerViewLiked.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            binding.recyclerViewLiked.setAdapter(contentAdapter);
+        }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // 🔥 Kullanıcının `likedlist` alanını çek
+        // 🔥 Kullanıcının `favorites` veya `likedlist` alanını çek
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        List<Map<String, Object>> likedItems = (List<Map<String, Object>>) documentSnapshot.get("likedlist");
-                        if (likedItems != null) {
-                            for (Map<String, Object> item : likedItems) {
+                        List<Map<String, Object>> items = (List<Map<String, Object>>) documentSnapshot.get(listType);
+                        if (items != null) {
+                            for (Map<String, Object> item : items) {
                                 String contentId = (String) item.get("ID");
                                 String type = (String) item.get("type");
 
                                 if (contentId != null && type != null) {
-                                    fetchContentDetails(contentId, type);
+                                    fetchContentDetails(contentId, type, contentList);
                                 }
                             }
                         }
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Beğenilen içerikler yüklenemedi!", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(getContext(), listType.equals("favorites") ? "Favori içerikler yüklenemedi!" : "Beğenilen içerikler yüklenemedi!", Toast.LENGTH_SHORT).show());
     }
 
     // 🔥 İçeriği `movies` veya `series` koleksiyonundan çek
-    private void fetchContentDetails(String contentId, String type) {
+    private void fetchContentDetails(String contentId, String type, List<Content> contentList) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String collectionName = type.equals("Film") ? "movies" : "series";
 
@@ -152,13 +163,66 @@ public class AccountFragment extends Fragment {
                                 doc.getString("poster_url"),
                                 type
                         );
-                        likedList.add(content);
+                        contentList.add(content);
                         contentAdapter.notifyDataSetChanged();
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "İçerik bilgisi yüklenemedi!", Toast.LENGTH_SHORT).show());
     }
+    private void showEditUserDialog() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) return;
 
+        String userId = user.getUid();
+
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 20, 50, 20);
+
+        EditText etName = new EditText(getContext());
+        EditText etSurname = new EditText(getContext());
+        EditText etEmail = new EditText(getContext());
+        EditText etPhone = new EditText(getContext());
+
+        layout.addView(etName);
+        layout.addView(etSurname);
+        layout.addView(etEmail);
+        layout.addView(etPhone);
+
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        etName.setText(documentSnapshot.getString("name"));
+                        etSurname.setText(documentSnapshot.getString("surname"));
+                        etEmail.setText(documentSnapshot.getString("email"));
+                        etPhone.setText(documentSnapshot.getString("phone"));
+                    }
+                });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Bilgileri Güncelle");
+        builder.setView(layout);
+        builder.setPositiveButton("Kaydet", (dialog, which) -> {
+            String newName = etName.getText().toString();
+            String newSurname = etSurname.getText().toString();
+            String newEmail = etEmail.getText().toString();
+            String newPhone = etPhone.getText().toString();
+
+            Map<String, Object> updatedData = new HashMap<>();
+            updatedData.put("name", newName);
+            updatedData.put("surname", newSurname);
+            updatedData.put("email", newEmail);
+            updatedData.put("phone", newPhone);
+
+            db.collection("users").document(userId)
+                    .update(updatedData)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Bilgiler Güncellendi!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Güncelleme Başarısız!", Toast.LENGTH_SHORT).show());
+        });
+
+        builder.setNegativeButton("İptal", null);
+        builder.show();
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();
