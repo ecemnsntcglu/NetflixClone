@@ -12,9 +12,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/netflixicon"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/netflixicon_round"
+        android:icon="@mipmap/ic_launcherry1"
+        android:label="Cherryflix"
+        android:roundIcon="@mipmap/ic_launcherry1_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Netflix"
         tools:targetApi="31">

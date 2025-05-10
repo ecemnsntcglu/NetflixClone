@@ -136,6 +136,7 @@ public class FeedFragment extends Fragment {
         });
     }
 
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

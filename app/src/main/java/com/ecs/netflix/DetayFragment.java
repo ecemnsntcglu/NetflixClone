@@ -1,6 +1,7 @@
 package com.ecs.netflix;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -60,6 +61,8 @@ public class DetayFragment extends Fragment {
             return;
         }
 
+
+
         String contentId = args.getString("contentId"); // İçeriğin ID'si
         String contentType = sharedPreferences.getString("contentType", null); // İçeriğin türü (Film veya Dizi)
 
@@ -91,6 +94,7 @@ public class DetayFragment extends Fragment {
         // Puan verme işlemi
         setupRatingMenu(view);
         checkIfFavorite(contentId);
+        setupShareButton();
     }
 
     private void fetchContent(String contentId, String contentType) {
@@ -101,7 +105,7 @@ public class DetayFragment extends Fragment {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String title = documentSnapshot.getString("title");
-                        String trailerUrl = documentSnapshot.getString("trailer_url");
+                        String trailerUrl = documentSnapshot.getString("trailer_url"); // Bu satırda trailer URL'sini alıyoruz.
                         String description = documentSnapshot.getString("description");
                         String director = documentSnapshot.getString("director");
                         List<String> castList = (List<String>) documentSnapshot.get("cast");
@@ -109,7 +113,7 @@ public class DetayFragment extends Fragment {
                         binding.textViewTitle.setText(title != null ? title : "Başlık bulunamadı");
                         binding.textViewDescription.setText(description != null ? description : "Açıklama bulunamadı");
 
-                        // 🔥 Yönetmen ve oyuncu bilgilerini ekrana yaz
+                        // Yönetmen ve oyuncu bilgilerini ekrana yaz
                         String castText = "Yönetmen: " + (director != null ? director : "Bilinmiyor") + "\nOyuncular: ";
                         if (castList != null && !castList.isEmpty()) {
                             castText += String.join(", ", castList);
@@ -118,7 +122,7 @@ public class DetayFragment extends Fragment {
                         }
                         binding.textViewCast.setText(castText);
 
-                        loadTrailer(trailerUrl);
+                        loadTrailer(trailerUrl); // trailerUrl'yi alıp videoyu oynatıyoruz
                     } else {
                         Toast.makeText(getContext(), "İçerik bulunamadı!", Toast.LENGTH_SHORT).show();
                     }
@@ -181,9 +185,18 @@ public class DetayFragment extends Fragment {
 
                 if (id == R.id.action_begenmedim) {
                     Toast.makeText(getContext(), "Beğenmedim seçildi", Toast.LENGTH_SHORT).show();
-                } else if (id == R.id.action_begendim || id == R.id.action_cok_begendim) {
+                } else if (id == R.id.action_begendim) {
+                    Toast.makeText(getContext(), "Beğendim seçildi", Toast.LENGTH_SHORT).show();
                     addToList("likedlist");
                 }
+
+                    else  {
+                        Toast.makeText(getContext(), "Çok Beğendim seçildi", Toast.LENGTH_SHORT).show();
+                        addToList("likedlist");
+
+                    }
+
+
 
                 return false;
             });
@@ -216,7 +229,7 @@ public class DetayFragment extends Fragment {
         // Firestore'dan veriyi kontrol et ve favoriye ekleyip çıkarma işlemi yap
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // 🔥 İçeriği eklemek veya çıkarmak için veri oluştur
+        // İçeriği eklemek veya çıkarmak için veri oluştur
         Map<String, Object> entry = new HashMap<>();
         entry.put("ID", contentId);
         entry.put("type", contentType);
@@ -266,6 +279,8 @@ public class DetayFragment extends Fragment {
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Favori listesi kontrol edilemedi!", Toast.LENGTH_SHORT).show());
     }
 
+
+
     private void checkIfFavorite(String contentId) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
@@ -309,6 +324,22 @@ public class DetayFragment extends Fragment {
                     Toast.makeText(getContext(), "Favori listesi kontrol edilemedi!", Toast.LENGTH_SHORT).show();
                 });
     }
+
+    private void setupShareButton() {
+        binding.imageShare.setOnClickListener(v -> {
+
+                    String contentText = "İzlemek için mükemmel bir içerik! Başlık: " + binding.textViewTitle.getText().toString();
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Film/Dizi Paylaşımı");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, contentText);
+                    startActivity(Intent.createChooser(shareIntent, "Paylaşmak için seçin"));
+
+
+        });
+    }
+
+
 
 
 

@@ -108,15 +108,15 @@ public class AccountFragment extends Fragment {
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
 
         contentAdapter = new ContentAdapter(requireContext(), contentList, (contentId, type) -> {
-            // 🔥 Seçilen içeriğe göre `SharedPreferences` güncelle
+            // Seçilen içeriğe göre `SharedPreferences` güncelle
             sharedPreferences.edit().putString("contentType", type).apply();
 
-            // 🔥 Detay sayfasına yönlendir
+            // Detay sayfasına yönlendir
             NavDirections action = AccountFragmentDirections.accountToDetay(contentId);
             NavHostFragment.findNavController(AccountFragment.this).navigate(action);
         });
 
-        // 🔥 Parametreye göre doğru RecyclerView seç
+        // Parametreye göre doğru RecyclerView seç
         if (listType.equals("favorites")) {
             binding.recyclerViewFav.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
             binding.recyclerViewFav.setAdapter(contentAdapter);
@@ -127,7 +127,7 @@ public class AccountFragment extends Fragment {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // 🔥 Kullanıcının `favorites` veya `likedlist` alanını çek
+        // Kullanıcının `favorites` veya `likedlist` alanını çek
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -147,6 +147,7 @@ public class AccountFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), listType.equals("favorites") ? "Favori içerikler yüklenemedi!" : "Beğenilen içerikler yüklenemedi!", Toast.LENGTH_SHORT).show());
     }
+
 
     // 🔥 İçeriği `movies` veya `series` koleksiyonundan çek
     private void fetchContentDetails(String contentId, String type, List<Content> contentList) {

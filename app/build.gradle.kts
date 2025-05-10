@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
 
+
     // Firebase Bağımlılıkları
     implementation(platform(libs.firebase.bom.v3300))
 
