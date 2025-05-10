@@ -19,15 +19,17 @@
 
     <ImageView
         android:id="@+id/imageViewProfile"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
         android:contentDescription="Profil Resmi"
-
+        android:scaleType="centerCrop"
         android:src="@drawable/fav_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvUserName"
@@ -58,15 +60,17 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <Button
-                android:id="@+id/btnBilgileriGuncelle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="#f3dfc1"
-                android:text="Bilgilerimi Güncelle"
-                android:textColor="#780000"
-                android:textSize="18sp" />
+            <Switch
+                android:id="@+id/switchTema"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:scaleX="2.0"
+                android:scaleY="2.0"
+                android:showText="true"
+                android:textOff="☀️"
+                android:textOn="🌙"
+                app:layout_constraintHorizontal_bias="0.45" />
 
             <TextView
                 android:id="@+id/tvFavHeader"
@@ -98,17 +102,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp" />
 
-            <Switch
-                android:id="@+id/switchTema"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_gravity="center"
-                android:scaleX="2.0"
-                android:scaleY="2.0"
-                android:showText="true"
-                android:textOff="☀️"
-                android:textOn="🌙"
-                app:layout_constraintHorizontal_bias="0.45" />
+            <Button
+                android:id="@+id/btnBilgileriGuncelle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#f3dfc1"
+                android:text="Bilgilerimi Güncelle"
+                android:textColor="#780000"
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btnCikis"

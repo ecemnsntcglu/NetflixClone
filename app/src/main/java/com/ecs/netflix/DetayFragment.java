@@ -103,6 +103,8 @@ public class DetayFragment extends Fragment {
             }
         });
 
+        setupShareButton();
+
     }
 
     private void fetchContent(String contentId, String contentType) {
