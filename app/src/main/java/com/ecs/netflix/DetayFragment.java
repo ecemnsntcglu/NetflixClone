@@ -90,6 +90,7 @@ public class DetayFragment extends Fragment {
 
         // Puan verme işlemi
         setupRatingMenu(view);
+        checkIfFavorite(contentId);
     }
 
     private void fetchContent(String contentId, String contentType) {
@@ -190,7 +191,6 @@ public class DetayFragment extends Fragment {
             popup.show();
         });
     }
-
     private void addToList(String listType) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
@@ -213,25 +213,105 @@ public class DetayFragment extends Fragment {
             return;
         }
 
+        // Firestore'dan veriyi kontrol et ve favoriye ekleyip çıkarma işlemi yap
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // 🔥 İçeriği eklemek için veri oluştur
+        // 🔥 İçeriği eklemek veya çıkarmak için veri oluştur
         Map<String, Object> entry = new HashMap<>();
         entry.put("ID", contentId);
         entry.put("type", contentType);
 
         db.collection("users").document(userId)
-                .update(listType, FieldValue.arrayUnion(entry))
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), listType.equals("favorites") ? "Favorilere eklendi ❤️" : "Beğenildi ve listeye eklendi 💖", Toast.LENGTH_SHORT).show();
-               if(listType.equals("favorites") ) {
-                   binding.imageFav.setImageResource(R.drawable.fav_btn);
-               }
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<Map<String, Object>> favItems = (List<Map<String, Object>>) documentSnapshot.get(listType);
+                        boolean isFavorite = false;
+
+                        if (favItems != null) {
+                            for (Map<String, Object> item : favItems) {
+                                String contentIdFromDb = (String) item.get("ID");
+                                if (contentIdFromDb != null && contentIdFromDb.equals(contentId)) {
+                                    isFavorite = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (isFavorite) {
+                            // Eğer favoriyse, favoriden çıkar
+                            db.collection("users").document(userId)
+                                    .update(listType, FieldValue.arrayRemove(entry))
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(getContext(), "Favoriden çıkarıldı", Toast.LENGTH_SHORT).show();
+                                        if (listType.equals("favorites")) {
+                                            binding.imageFav.setImageResource(R.drawable.non_fav_btn); // Favoriden çıkarıldı, iconu boş kalp yap
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Favoriden çıkarma başarısız oldu", Toast.LENGTH_SHORT).show());
+                        } else {
+                            // Eğer favori değilse, favoriye ekle
+                            db.collection("users").document(userId)
+                                    .update(listType, FieldValue.arrayUnion(entry))
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(getContext(), "Favorilere eklendi ❤️", Toast.LENGTH_SHORT).show();
+                                        if (listType.equals("favorites")) {
+                                            binding.imageFav.setImageResource(R.drawable.fav_btn); // Favoriye eklenince iconu dolu kalp yap
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Favoriye ekleme başarısız oldu", Toast.LENGTH_SHORT).show());
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Favori listesi kontrol edilemedi!", Toast.LENGTH_SHORT).show());
+    }
+
+    private void checkIfFavorite(String contentId) {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Kullanıcı oturumu açık değil!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = user.getUid();
+
+        // Firestore'dan favori listesinde içerik var mı kontrol et
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<Map<String, Object>> favItems = (List<Map<String, Object>>) documentSnapshot.get("favList");
+
+                        boolean isFavorite = false;
+
+                        if (favItems != null) {
+                            // Favori listesinde içerik olup olmadığını kontrol et
+                            for (Map<String, Object> item : favItems) {
+                                String contentIdFromDb = (String) item.get("ID");
+                                if (contentIdFromDb != null && contentIdFromDb.equals(contentId)) {
+                                    isFavorite = true; // Favoriye eklenmişse
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Favori durumu kontrol edildikten sonra, UI'yi güncelle
+                        if (isFavorite) {
+                            // Favoriye eklenmişse, iconu dolu kalp yap
+                            binding.imageFav.setImageResource(R.drawable.fav_btn); // favori butonu dolu kalp
+                        } else {
+                            // Favoriye eklenmemişse, iconu boş kalp yap
+                            binding.imageFav.setImageResource(R.drawable.non_fav_btn); // favori butonu boş kalp
+                        }
+                    }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Listeye ekleme başarısız oldu 😢", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Favori listesi kontrol edilemedi!", Toast.LENGTH_SHORT).show();
                 });
     }
+
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
