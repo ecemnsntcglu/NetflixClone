@@ -32,8 +32,11 @@ public class AccountFragment extends Fragment {
     private FragmentAccountBinding binding;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-    private ContentAdapter contentAdapter;
-    private List<Content> likedList;
+    private ContentAdapter likedAdapter;
+    private ContentAdapter favoritesAdapter;
+    private List<Content> likedList = new ArrayList<>();
+    private List<Content> favoritesList = new ArrayList<>();
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,8 +78,11 @@ public class AccountFragment extends Fragment {
                 themePrefManager.setDarkMode(true);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             }
+
         });
+
     }
+
 
     private void loadUserInfo() {
         FirebaseUser user = auth.getCurrentUser();
@@ -104,30 +110,44 @@ public class AccountFragment extends Fragment {
         }
 
         String userId = user.getUid();
-        List<Content> contentList = new ArrayList<>();
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
 
-        contentAdapter = new ContentAdapter(requireContext(), contentList, (contentId, type) -> {
-            // 🔥 Seçilen içeriğe göre `SharedPreferences` güncelle
-            sharedPreferences.edit().putString("contentType", type).apply();
+        // Uygun listeyi ve adapter'ı seç
+        List<Content> targetList;
+        ContentAdapter targetAdapter;
 
-            // 🔥 Detay sayfasına yönlendir
-            NavDirections action = AccountFragmentDirections.accountToDetay(contentId);
-            NavHostFragment.findNavController(AccountFragment.this).navigate(action);
-        });
-
-        // 🔥 Parametreye göre doğru RecyclerView seç
         if (listType.equals("favorites")) {
+            favoritesList.clear();
+            targetList = favoritesList;
+
+            favoritesAdapter = new ContentAdapter(requireContext(), targetList, (contentId, type) -> {
+                sharedPreferences.edit().putString("contentType", type).apply();
+                NavDirections action = AccountFragmentDirections.accountToDetay(contentId);
+                NavHostFragment.findNavController(AccountFragment.this).navigate(action);
+            });
+
             binding.recyclerViewFav.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-            binding.recyclerViewFav.setAdapter(contentAdapter);
+            binding.recyclerViewFav.setAdapter(favoritesAdapter);
+
+            targetAdapter = favoritesAdapter;
         } else {
+            likedList.clear();
+            targetList = likedList;
+
+            likedAdapter = new ContentAdapter(requireContext(), targetList, (contentId, type) -> {
+                sharedPreferences.edit().putString("contentType", type).apply();
+                NavDirections action = AccountFragmentDirections.accountToDetay(contentId);
+                NavHostFragment.findNavController(AccountFragment.this).navigate(action);
+            });
+
             binding.recyclerViewLiked.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-            binding.recyclerViewLiked.setAdapter(contentAdapter);
+            binding.recyclerViewLiked.setAdapter(likedAdapter);
+
+            targetAdapter = likedAdapter;
         }
 
+        // Firestore'dan kullanıcı verisini çek
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // 🔥 Kullanıcının `favorites` veya `likedlist` alanını çek
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -139,19 +159,25 @@ public class AccountFragment extends Fragment {
                                 String type = (String) item.get("type");
 
                                 if (contentId != null && type != null) {
-                                    fetchContentDetails(contentId, type, contentList);
+                                    fetchContentDetails(contentId, type, targetList, targetAdapter);
+                                } else {
+                                    Toast.makeText(getContext(), "TYPE ya da ID eksik!", Toast.LENGTH_SHORT).show();
                                 }
                             }
+                        } else {
+                            Toast.makeText(getContext(), "Liste boş: " + listType, Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), listType.equals("favorites") ? "Favori içerikler yüklenemedi!" : "Beğenilen içerikler yüklenemedi!", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(getContext(), listType.equals("favorites") ? "Favoriler yüklenemedi!" : "Beğenilenler yüklenemedi!", Toast.LENGTH_SHORT).show());
     }
 
     // 🔥 İçeriği `movies` veya `series` koleksiyonundan çek
-    private void fetchContentDetails(String contentId, String type, List<Content> contentList) {
+    private void fetchContentDetails(String contentId, String type, List<Content> contentList, ContentAdapter adapter) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String collectionName = type.equals("Film") ? "movies" : "series";
+
+
 
         db.collection(collectionName).document(contentId)
                 .get()
@@ -164,11 +190,13 @@ public class AccountFragment extends Fragment {
                                 type
                         );
                         contentList.add(content);
-                        contentAdapter.notifyDataSetChanged();
+                        adapter.notifyDataSetChanged();
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "İçerik bilgisi yüklenemedi!", Toast.LENGTH_SHORT).show());
     }
+
+
     private void showEditUserDialog() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) return;
