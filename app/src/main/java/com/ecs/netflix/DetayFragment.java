@@ -110,6 +110,8 @@ public class DetayFragment extends Fragment {
             }
         });
 
+        setupShareButton();
+
     }
     private void fetchComments(String contentId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
