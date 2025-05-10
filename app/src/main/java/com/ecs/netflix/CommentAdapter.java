@@ -31,17 +31,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = commentList.get(position);
-        holder.userName.setText(comment.getUserName());
-        holder.commentText.setText(comment.getCommentText());
-
-        // 🔥 Status değerine göre ikon belirleme
-        if (comment.getStatus().equals("Beğendim")) {
-            holder.statusIcon.setImageResource(R.drawable.ic_like);
-        } else if (comment.getStatus().equals("Çok Beğendim")) {
-            holder.statusIcon.setImageResource(R.drawable.ic_love);
-        } else {
-            holder.statusIcon.setImageResource(R.drawable.ic_dislike);
-        }
+        holder.textViewUserName.setText(comment.getUserName());
+        holder.textViewComment.setText(comment.getCommentText());
+        holder.textViewStatus.setText(comment.getStatus());
     }
 
     @Override
@@ -50,14 +42,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     }
 
     public static class CommentViewHolder extends RecyclerView.ViewHolder {
-        TextView userName, commentText;
-        ImageView statusIcon;
+        TextView textViewUserName, textViewComment, textViewStatus, textViewTime;
 
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
-            userName = itemView.findViewById(R.id.txtUserName);
-            commentText = itemView.findViewById(R.id.txtComment);
-            statusIcon = itemView.findViewById(R.id.imgStatus);
+            textViewUserName = itemView.findViewById(R.id.textViewUserName);
+            textViewComment = itemView.findViewById(R.id.textViewComment);
+            textViewStatus = itemView.findViewById(R.id.textViewStatus);
+            textViewTime = itemView.findViewById(R.id.textViewTime);
         }
     }
 }

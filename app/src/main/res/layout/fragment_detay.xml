@@ -140,16 +140,25 @@
             android:maxLines="3"
             android:ellipsize="end"/>
 
-
-        <!-- Bölümler Başlığı -->
         <TextView
             android:id="@+id/textViewCommentsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Yorumalar"
+            android:text="Yorumlar"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:layout_marginTop="24dp"/>
+        <EditText
+            android:id="@+id/editTextComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Yorum yap" />
+
+        <Button
+            android:id="@+id/buttonPostComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Yorum Yap" />
 
         <!-- Bölümler RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
