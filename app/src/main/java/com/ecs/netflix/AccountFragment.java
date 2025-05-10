@@ -3,6 +3,7 @@ package com.ecs.netflix;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,11 +22,13 @@ import com.ecs.netflix.databinding.FragmentAccountBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 public class AccountFragment extends Fragment {
 
@@ -78,8 +81,11 @@ public class AccountFragment extends Fragment {
                 themePrefManager.setDarkMode(true);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             }
+
         });
+
     }
+
 
     private void loadUserInfo() {
         FirebaseUser user = auth.getCurrentUser();
@@ -107,30 +113,44 @@ public class AccountFragment extends Fragment {
         }
 
         String userId = user.getUid();
-        List<Content> contentList = new ArrayList<>();
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
 
-        contentAdapter = new ContentAdapter(requireContext(), contentList, (contentId, type) -> {
-            // 🔥 Seçilen içeriğe göre `SharedPreferences` güncelle
-            sharedPreferences.edit().putString("contentType", type).apply();
+        // Uygun listeyi ve adapter'ı seç
+        List<Content> targetList;
+        ContentAdapter targetAdapter;
 
-            // 🔥 Detay sayfasına yönlendir
-            NavDirections action = AccountFragmentDirections.accountToDetay(contentId);
-            NavHostFragment.findNavController(AccountFragment.this).navigate(action);
-        });
-
-        // 🔥 Parametreye göre doğru RecyclerView seç
         if (listType.equals("favorites")) {
+            favoritesList.clear();
+            targetList = favoritesList;
+
+            favoritesAdapter = new ContentAdapter(requireContext(), targetList, (contentId, type) -> {
+                sharedPreferences.edit().putString("contentType", type).apply();
+                NavDirections action = AccountFragmentDirections.accountToDetay(contentId);
+                NavHostFragment.findNavController(AccountFragment.this).navigate(action);
+            });
+
             binding.recyclerViewFav.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-            binding.recyclerViewFav.setAdapter(contentAdapter);
+            binding.recyclerViewFav.setAdapter(favoritesAdapter);
+
+            targetAdapter = favoritesAdapter;
         } else {
+            likedList.clear();
+            targetList = likedList;
+
+            likedAdapter = new ContentAdapter(requireContext(), targetList, (contentId, type) -> {
+                sharedPreferences.edit().putString("contentType", type).apply();
+                NavDirections action = AccountFragmentDirections.accountToDetay(contentId);
+                NavHostFragment.findNavController(AccountFragment.this).navigate(action);
+            });
+
             binding.recyclerViewLiked.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-            binding.recyclerViewLiked.setAdapter(contentAdapter);
+            binding.recyclerViewLiked.setAdapter(likedAdapter);
+
+            targetAdapter = likedAdapter;
         }
 
+        // Firestore'dan kullanıcı verisini çek
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // 🔥 Kullanıcının `favorites` veya `likedlist` alanını çek
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -142,19 +162,25 @@ public class AccountFragment extends Fragment {
                                 String type = (String) item.get("type");
 
                                 if (contentId != null && type != null) {
-                                    fetchContentDetails(contentId, type, contentList);
+                                    fetchContentDetails(contentId, type, targetList, targetAdapter);
+                                } else {
+                                    Toast.makeText(getContext(), "TYPE ya da ID eksik!", Toast.LENGTH_SHORT).show();
                                 }
                             }
+                        } else {
+                            Toast.makeText(getContext(), "Liste boş: " + listType, Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), listType.equals("favorites") ? "Favori içerikler yüklenemedi!" : "Beğenilen içerikler yüklenemedi!", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(getContext(), listType.equals("favorites") ? "Favoriler yüklenemedi!" : "Beğenilenler yüklenemedi!", Toast.LENGTH_SHORT).show());
     }
 
-    // 🔥 İçeriği `movies` veya `series` koleksiyonundan çek
-    private void fetchContentDetails(String contentId, String type, List<Content> contentList) {
+    // 🔥 İçeriği movies veya series koleksiyonundan çek
+    private void fetchContentDetails(String contentId, String type, List<Content> contentList, ContentAdapter adapter) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String collectionName = type.equals("Film") ? "movies" : "series";
+
+
 
         db.collection(collectionName).document(contentId)
                 .get()
@@ -167,11 +193,14 @@ public class AccountFragment extends Fragment {
                                 type
                         );
                         contentList.add(content);
-                        contentAdapter.notifyDataSetChanged();
+                        adapter.notifyDataSetChanged();
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "İçerik bilgisi yüklenemedi!", Toast.LENGTH_SHORT).show());
     }
+
+
+
     private void showEditUserDialog() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) return;
@@ -226,6 +255,83 @@ public class AccountFragment extends Fragment {
         builder.setNegativeButton("İptal", null);
         builder.show();
     }
+
+    private void saveProfileImageToFirestore(String profileImageUrl) {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Kullanıcı oturumu açık değil!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = user.getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> profileData = new HashMap<>();
+        profileData.put("profileImage", profileImageUrl);
+
+        db.collection("users").document(userId)
+                .update(profileData)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Profil resmi başarıyla güncellendi!", Toast.LENGTH_SHORT).show();
+                    loadProfileImage();  // Profil resmini yükle
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Profil resmi güncellenemedi!", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void loadProfileImage() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Kullanıcı oturumu açık değil!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = user.getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String profileImageUrl = documentSnapshot.getString("profileImage");
+                        if (profileImageUrl != null) {
+                            Glide.with(getContext())
+                                    .load(profileImageUrl)
+                                    .into(binding.imageViewProfile);  // Profil resmi ImageView'a yükle
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Profil resmi yüklenemedi!", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+    private void uploadProfileImage(Uri imageUri) {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Kullanıcı oturumu açık değil!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = user.getUid();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("profile_pictures/" + userId + ".jpg");
+
+        storageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String profileImageUrl = uri.toString();
+                        // Firestore'a profil resmini kaydediyoruz
+                        saveProfileImageToFirestore(profileImageUrl);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Resim yükleme başarısız oldu", Toast.LENGTH_SHORT).show();
+                });
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
