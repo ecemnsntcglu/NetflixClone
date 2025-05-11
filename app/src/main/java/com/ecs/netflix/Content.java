@@ -1,10 +1,16 @@
 package com.ecs.netflix;
 
+import java.util.List;
+
 public class Content {
     private String id;
     private String title;
     private String posterUrl;
     private String type; // "Film" veya "Dizi"
+    private String description;
+    private String trailerUrl;
+    private String director;
+    private List<String> cast;
 
     public Content() {}
 
@@ -13,6 +19,10 @@ public class Content {
         this.title = title;
         this.posterUrl = posterUrl;
         this.type = type;
+        this.description = description;
+        this.trailerUrl = trailerUrl;
+        this.director = director;
+        this.cast = cast;
     }
 
     public String getId() { return id; }

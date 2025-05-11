@@ -111,7 +111,6 @@ android:layout_marginTop="30dp"
                 android:text="Bilgilerimi Güncelle"
                 android:textColor="#780000"
                 android:textSize="18sp" />
-
             <Button
                 android:id="@+id/btnCikis"
                 android:layout_width="match_parent"
@@ -122,16 +121,7 @@ android:layout_marginTop="30dp"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp" />
 
-            <Button
-                android:id="@+id/btnFilmEkle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="#f3dfc1"
-                android:text="Film Ekle"
-                android:textColor="#780000"
-                android:textSize="18sp"
-                android:visibility="gone" />
+
 
 
         </LinearLayout>
