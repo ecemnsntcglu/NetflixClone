@@ -21,8 +21,8 @@
         android:id="@+id/imageViewProfile"
         android:layout_width="150dp"
         android:layout_height="150dp"
-android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
         android:contentDescription="Profil Resmi"
         android:scaleType="centerCrop"
         android:src="@drawable/fav_btn"
@@ -44,6 +44,22 @@ android:layout_marginTop="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imageViewProfile" />
+
+
+    <TextView
+        android:id="@+id/tvBadges"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rozetler yükleniyor..."
+        android:textColor="#FFD700"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvUserName" />
+
     <!-- NestedScrollView ile içeriği kaydırılabilir hale getir -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -65,6 +81,7 @@ android:layout_marginTop="30dp"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
+                android:layout_marginTop="32dp"
                 android:scaleX="2.0"
                 android:scaleY="2.0"
                 android:showText="true"
@@ -111,6 +128,7 @@ android:layout_marginTop="30dp"
                 android:text="Bilgilerimi Güncelle"
                 android:textColor="#780000"
                 android:textSize="18sp" />
+
             <Button
                 android:id="@+id/btnCikis"
                 android:layout_width="match_parent"
@@ -120,8 +138,6 @@ android:layout_marginTop="30dp"
                 android:text="Çıkış Yap"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp" />
-
-
 
 
         </LinearLayout>

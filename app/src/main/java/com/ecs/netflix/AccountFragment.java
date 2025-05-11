@@ -68,6 +68,7 @@ public class AccountFragment extends Fragment {
         
         // Kullanıcı bilgilerini yükle
         loadUserInfo();
+        loadUserAchievements();
 
         // Beğenilen içerikleri yükle
         loadContent("likedlist");
@@ -362,6 +363,43 @@ public class AccountFragment extends Fragment {
         builder.setNegativeButton("İptal", null);
         builder.show();
     }
+    private void loadUserAchievements() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) return;
+
+        String userId = user.getUid();
+
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(document -> {
+                    List<Map<String, Object>> favs = (List<Map<String, Object>>) document.get("favorites");
+                    int favCount = favs != null ? favs.size() : 0;
+
+                    db.collection("comments").whereEqualTo("userId", userId).get()
+                            .addOnSuccessListener(commentSnap -> {
+                                int commentCount = commentSnap.size();
+
+                                List<Map<String, Object>> watched = (List<Map<String, Object>>) document.get("recentlyWatched");
+                                int watchCount = watched != null ? watched.size() : 0;
+
+                                showBadges(favCount, commentCount, watchCount);
+                            });
+                });
+    }
+
+    private void showBadges(int favCount, int commentCount, int watchCount) {
+        StringBuilder badges = new StringBuilder();
+
+        if (favCount >= 10) badges.append("🏅 Beğeni Canavarı\n");
+        if (commentCount >= 1) badges.append("💬 Sosyal Kullanıcı\n");
+        if (watchCount >= 1) badges.append("🎬 Dizi Uzmanı\n");
+
+        if (badges.length() == 0) {
+            badges.append("Henüz rozet kazanmadın 💔");
+        }
+
+        binding.tvBadges.setText(badges.toString());
+    }
+
 
 
     @Override
