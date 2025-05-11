@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ecs.netflix.databinding.FragmentDetayBinding;
 import com.google.android.gms.tasks.Task;
@@ -29,6 +30,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +67,54 @@ public class DetayFragment extends Fragment {
             return;
         }
 
-        String contentId = args.getString("contentId"); // İçeriğin ID'si
+        // 1. RecyclerView + Adapter
+        List<Comment> comments = new ArrayList<>();
+        CommentAdapter adapter = new CommentAdapter(getContext(), comments);
+        binding.recyclerViewComments.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerViewComments.setAdapter(adapter);
+
+// 2. Yorumları dinle
+        String contentId = getArguments().getString("contentId");
+        db.collection("comments")
+                .whereEqualTo("contentId", contentId)
+                .orderBy("timestamp")
+                .addSnapshotListener((snap, err) -> {
+                    if (err!=null) return;
+                    comments.clear();
+                    for (DocumentSnapshot d: snap.getDocuments()) {
+                        comments.add(d.toObject(Comment.class));
+                    }
+                    adapter.notifyDataSetChanged();
+                });
+
+// 3. Yeni yorum ekleme
+        binding.buttonPostComment.setOnClickListener(v -> {
+            String txt = binding.editTextComment.getText().toString().trim();
+            FirebaseUser u = auth.getCurrentUser();
+            if (u != null && !txt.isEmpty()) {
+                long currentTime = System.currentTimeMillis();
+                Comment newComment = new Comment(u.getUid(), txt, currentTime);
+
+                // 1. Firestore'a gönder
+                Map<String, Object> m = new HashMap<>();
+                m.put("userId", u.getUid());
+                m.put("commentText", txt);
+                m.put("timestamp", currentTime);
+                m.put("contentId", contentId);
+
+                db.collection("comments").add(m)
+                        .addOnSuccessListener(doc -> {
+                            binding.editTextComment.setText("");
+
+                            // 2. Anında RecyclerView'a ekle
+                            comments.add(newComment);
+                            adapter.notifyItemInserted(comments.size() - 1);
+                            binding.recyclerViewComments.scrollToPosition(comments.size() - 1);
+                        });
+            }
+        });
+
+
         String contentType = sharedPreferences.getString("contentType", null); // İçeriğin türü (Film veya Dizi)
 
         if (contentId == null || contentType == null) {
@@ -104,6 +153,8 @@ public class DetayFragment extends Fragment {
         });
 
         setupShareButton();
+
+
 
     }
 
@@ -320,9 +371,6 @@ public class DetayFragment extends Fragment {
 
         });
     }
-
-
-
 
 
     @Override

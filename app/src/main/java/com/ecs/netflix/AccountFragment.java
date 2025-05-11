@@ -278,8 +278,6 @@ public class AccountFragment extends Fragment {
                                     Toast.makeText(getContext(), "TYPE ya da ID eksik!", Toast.LENGTH_SHORT).show();
                                 }
                             }
-                        } else {
-                            Toast.makeText(getContext(), "Liste boş: " + listType, Toast.LENGTH_SHORT).show();
                         }
                     }
                 })

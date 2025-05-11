@@ -10,46 +10,66 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
-    private Context context;
-    private List<Comment> commentList;
+public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.VH> {
+    private List<Comment> list;
+    private Context ctx;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseAuth auth = FirebaseAuth.getInstance();
 
-    public CommentAdapter(Context context, List<Comment> commentList) {
-        this.context = context;
-        this.commentList = commentList;
+    public CommentAdapter(Context ctx, List<Comment> list) {
+        this.ctx = ctx;
+        this.list = list;
     }
 
-    @NonNull
-    @Override
-    public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_comment, parent, false);
-        return new CommentViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
-        Comment comment = commentList.get(position);
-        holder.textViewUserName.setText(comment.getUserName());
-        holder.textViewComment.setText(comment.getCommentText());
-        holder.textViewStatus.setText(comment.getStatus());
-    }
-
-    @Override
-    public int getItemCount() {
-        return commentList.size();
-    }
-
-    public static class CommentViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewUserName, textViewComment, textViewStatus, textViewTime;
-
-        public CommentViewHolder(@NonNull View itemView) {
-            super(itemView);
-            textViewUserName = itemView.findViewById(R.id.textViewUserName);
-            textViewComment = itemView.findViewById(R.id.textViewComment);
-            textViewStatus = itemView.findViewById(R.id.textViewStatus);
-            textViewTime = itemView.findViewById(R.id.textViewTime);
+    public static class VH extends RecyclerView.ViewHolder {
+        ImageView ivPhoto;
+        TextView tvUserName, tvDate, tvCommentText;
+        public VH(View v) {
+            super(v);
+            ivPhoto = v.findViewById(R.id.ivUserPhoto);
+            tvUserName = v.findViewById(R.id.tvUserName);
+            tvDate = v.findViewById(R.id.tvDate);
+            tvCommentText = v.findViewById(R.id.tvCommentText);
         }
     }
+
+    @NonNull @Override
+    public VH onCreateViewHolder(@NonNull ViewGroup p, int i) {
+        View v = LayoutInflater.from(ctx).inflate(R.layout.item_comment, p, false);
+        return new VH(v);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull VH h, int pos) {
+        Comment c = list.get(pos);
+        h.tvCommentText.setText(c.getCommentText());
+        // Tarih formatla:
+        Date d = new Date(c.getTimestamp());
+        String formatted = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(d);
+        h.tvDate.setText(formatted);
+
+        // Kullanıcı adı + fotoğraf çek:
+        db.collection("users").document(c.getUserId())
+                .get().addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String name = doc.getString("name");
+                        String url  = doc.getString("profileImage");
+                        h.tvUserName.setText(name != null ? name : "Anonim");
+                        if (url != null && !url.isEmpty()) {
+                            Glide.with(ctx).load(url).circleCrop().into(h.ivPhoto);
+                        }
+                    }
+                });
+    }
+
+    @Override public int getItemCount() { return list.size(); }
 }

@@ -1,25 +1,19 @@
 package com.ecs.netflix;
 
 public class Comment {
-    private String userName;
+    private String userId;
     private String commentText;
-    private String status;
+    private long timestamp;
 
-    public Comment(String userName, String commentText, String status) {
-        this.userName = userName;
+    public Comment() {}
+
+    public Comment(String userId, String commentText, long timestamp) {
+        this.userId = userId;
         this.commentText = commentText;
-        this.status = status;
+        this.timestamp = timestamp;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getCommentText() {
-        return commentText;
-    }
-
-    public String getStatus() {
-        return status;
-    }
+    public String getUserId() { return userId; }
+    public String getCommentText() { return commentText; }
+    public long getTimestamp() { return timestamp; }
 }
