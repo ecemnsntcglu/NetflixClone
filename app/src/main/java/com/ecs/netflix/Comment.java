@@ -5,6 +5,16 @@ public class Comment {
     private String commentText;
     private long timestamp;
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    private String status;
+
     public Comment() {}
 
     public Comment(String userId, String commentText, long timestamp) {
@@ -12,6 +22,7 @@ public class Comment {
         this.commentText = commentText;
         this.timestamp = timestamp;
     }
+
 
     public String getUserId() { return userId; }
     public String getCommentText() { return commentText; }

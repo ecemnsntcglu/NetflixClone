@@ -140,6 +140,92 @@
             android:maxLines="3"
             android:ellipsize="end"/>
 
+        <!-- Beğeni Sayısı Alanı -->
+        <LinearLayout
+            android:id="@+id/layoutLikeCounts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+
+            <!-- Like (Beğendim) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/imageLike"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_like"
+                    android:contentDescription="Beğendim"/>
+
+                <TextView
+                    android:id="@+id/textLikeCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- Love (Çok Beğendim) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/imageLove"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_love"
+                    android:contentDescription="Çok Beğendim"/>
+
+                <TextView
+                    android:id="@+id/textLoveCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- Dislike (Beğenmedim) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/imageDislike"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_dislike"
+                    android:contentDescription="Beğenmedim"/>
+
+                <TextView
+                    android:id="@+id/textDislikeCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
         <TextView
             android:id="@+id/textViewCommentsTitle"
             android:layout_width="wrap_content"
@@ -148,7 +234,8 @@
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:layout_marginTop="24dp"/>
-        <!-- Bölümler RecyclerView -->
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewComments"
             android:layout_width="match_parent"
@@ -159,7 +246,8 @@
             android:id="@+id/editTextComment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Yorum yap" />
+            android:hint="Yorum yap"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/buttonPostComment"
@@ -168,6 +256,7 @@
             android:layout_marginBottom="200dp"
             android:backgroundTint="#eeeee4"
             android:text="Yorum Yap"
+            android:visibility="gone"
 
             />
 

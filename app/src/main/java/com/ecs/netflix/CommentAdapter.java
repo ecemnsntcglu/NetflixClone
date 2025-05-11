@@ -31,18 +31,21 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.VH> {
     }
 
     public static class VH extends RecyclerView.ViewHolder {
-        ImageView ivPhoto;
+        ImageView ivPhoto, ivStatus; // 🔥 Status ikonu eklendi
         TextView tvUserName, tvDate, tvCommentText;
+
         public VH(View v) {
             super(v);
             ivPhoto = v.findViewById(R.id.ivUserPhoto);
+            ivStatus = v.findViewById(R.id.ivstatus); // 🔥 Status ikonu bağlandı
             tvUserName = v.findViewById(R.id.tvUserName);
             tvDate = v.findViewById(R.id.tvDate);
             tvCommentText = v.findViewById(R.id.tvCommentText);
         }
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public VH onCreateViewHolder(@NonNull ViewGroup p, int i) {
         View v = LayoutInflater.from(ctx).inflate(R.layout.item_comment, p, false);
         return new VH(v);
@@ -52,12 +55,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int pos) {
         Comment c = list.get(pos);
         h.tvCommentText.setText(c.getCommentText());
-        // Tarih formatla:
+
+        // 🔥 Tarih formatla:
         Date d = new Date(c.getTimestamp());
         String formatted = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(d);
         h.tvDate.setText(formatted);
 
-        // Kullanıcı adı + fotoğraf çek:
+        // 🔥 Kullanıcı adı + fotoğraf + status çek:
         db.collection("users").document(c.getUserId())
                 .get().addOnSuccessListener(doc -> {
                     if (doc.exists()) {
@@ -69,7 +73,21 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.VH> {
                         }
                     }
                 });
+
+        // 🔥 Status değerine göre ikon değiştir
+        if ("like".equals(c.getStatus())) {
+            h.ivStatus.setImageResource(R.drawable.ic_like);
+        } else if ("love".equals(c.getStatus())) {
+            h.ivStatus.setImageResource(R.drawable.ic_love);
+        } else if ("dislike".equals(c.getStatus())) {
+            h.ivStatus.setImageResource(R.drawable.ic_dislike);
+        } else {
+            h.ivStatus.setVisibility(View.GONE); // Eğer status yoksa ikon gizlenir
+        }
     }
 
-    @Override public int getItemCount() { return list.size(); }
+    @Override
+    public int getItemCount() {
+        return list.size();
+    }
 }

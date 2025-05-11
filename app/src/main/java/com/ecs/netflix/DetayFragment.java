@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class DetayFragment extends Fragment {
@@ -42,6 +43,7 @@ public class DetayFragment extends Fragment {
     private SharedPreferences sharedPreferences;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    String status;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -79,12 +81,44 @@ public class DetayFragment extends Fragment {
                 .whereEqualTo("contentId", contentId)
                 .orderBy("timestamp")
                 .addSnapshotListener((snap, err) -> {
-                    if (err!=null) return;
+                    if (err != null) return;
+
                     comments.clear();
-                    for (DocumentSnapshot d: snap.getDocuments()) {
-                        comments.add(d.toObject(Comment.class));
+
+                    // 🔥 Beğeni sayıları (AtomicInteger kullanarak değiştirilebilir hale getirdik)
+                    AtomicInteger likeCount = new AtomicInteger(0);
+                    AtomicInteger loveCount = new AtomicInteger(0);
+                    AtomicInteger dislikeCount = new AtomicInteger(0);
+
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        Comment comment = d.toObject(Comment.class);
+
+                        if (comment != null) {
+                            // 🔥 Beğeni sayısını artır
+                            if ("like".equals(comment.getStatus())) {
+                                likeCount.incrementAndGet();
+                            } else if ("love".equals(comment.getStatus())) {
+                                loveCount.incrementAndGet();
+                            } else if ("dislike".equals(comment.getStatus())) {
+                                dislikeCount.incrementAndGet();
+                            }
+
+                            // 🔥 Yorum içeriği null değilse listeye ekle
+                            if (comment.getCommentText() != null && !comment.getCommentText().trim().isEmpty()) {
+                                comments.add(comment);
+                            }
+
+                        }
                     }
+
                     adapter.notifyDataSetChanged();
+
+                    // 🔥 Beğeni sayısını güncelle (UI Thread içinde çalıştır)
+                    requireActivity().runOnUiThread(() -> {
+                        binding.textLikeCount.setText(String.valueOf(likeCount.get()));
+                        binding.textLoveCount.setText(String.valueOf(loveCount.get()));
+                        binding.textDislikeCount.setText(String.valueOf(dislikeCount.get()));
+                    });
                 });
 
 // 3. Yeni yorum ekleme
@@ -101,6 +135,7 @@ public class DetayFragment extends Fragment {
                 m.put("commentText", txt);
                 m.put("timestamp", currentTime);
                 m.put("contentId", contentId);
+                m.put("status",status);
 
                 db.collection("comments").add(m)
                         .addOnSuccessListener(doc -> {
@@ -111,6 +146,8 @@ public class DetayFragment extends Fragment {
                             adapter.notifyItemInserted(comments.size() - 1);
                             binding.recyclerViewComments.scrollToPosition(comments.size() - 1);
                         });
+                binding.editTextComment.setVisibility(View.GONE);
+                binding.buttonPostComment.setVisibility(View.GONE);
             }
         });
 
@@ -245,12 +282,24 @@ public class DetayFragment extends Fragment {
                 int id = item.getItemId();
                 String contentId = getArguments().getString("contentId");
                 String contentType = sharedPreferences.getString("contentType", null);
+                binding.editTextComment.setVisibility(View.VISIBLE);
+                binding.buttonPostComment.setVisibility(View.VISIBLE);
+
+                // 🔥 Kullanıcıyı yorum yazma alanına odakla
+                binding.editTextComment.requestFocus();
+
                 if (id == R.id.action_begenmedim) {
                     Toast.makeText(getContext(), "Beğenmedim seçildi", Toast.LENGTH_SHORT).show();
                     removeFromList("likedlist",contentId,contentType);
-                } else if (id == R.id.action_begendim || id == R.id.action_cok_begendim) {
+                    status= "dislike";
+                } else if (id == R.id.action_begendim ) {
                     Toast.makeText(getContext(), "Beğendim seçildi", Toast.LENGTH_SHORT).show();
                     addToList("likedlist");
+                    status= "like";
+                }else if ( id == R.id.action_cok_begendim) {
+                    Toast.makeText(getContext(), "Çok Beğendim seçildi", Toast.LENGTH_SHORT).show();
+                    addToList("likedlist");
+                    status= "love";
                 }
 
                 return false;
