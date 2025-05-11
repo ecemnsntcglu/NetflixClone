@@ -1,147 +1,111 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/fragmentBackground"
-    tools:context=".AccountFragment">
+    tools:context=".AccountFragment"
+    android:fillViewport="true">
 
-    <View
-        android:id="@+id/fadeView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0"
-        android:background="#FFFFFF"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/imageViewProfile"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:contentDescription="Profil Resmi"
-        android:scaleType="centerCrop"
-        android:src="@drawable/fav_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvUserName"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="15dp"
-        android:text="Kullanıcı Adı"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageViewProfile" />
+        <ImageView
+            android:id="@+id/imageViewProfile"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:contentDescription="Profil Resmi"
+            android:scaleType="centerCrop"
+            android:src="@drawable/fav_btn" />
 
+        <TextView
+            android:id="@+id/tvUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="15dp"
+            android:layout_gravity="center_horizontal"
+            android:text="Kullanıcı Adı"
+            android:textSize="19sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/tvBadges"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rozetler yükleniyor..."
-        android:textColor="#FFD700"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        <TextView
+            android:id="@+id/tvBadges"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rozetler yükleniyor..."
+            android:textColor="#eeeee4"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal" />
 
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvUserName" />
+        <Switch
+            android:id="@+id/switchTema"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:scaleX="1.4"
+            android:scaleY="1.4"
+            android:showText="true"
+            android:textOff="☀️"
+            android:textOn="🌙" />
 
-    <!-- NestedScrollView ile içeriği kaydırılabilir hale getir -->
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvUserName">
+        <TextView
+            android:id="@+id/tvFavHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Favori Listem"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
 
-        <LinearLayout
-            android:id="@+id/menuLayout"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewFav"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_marginTop="8dp" />
 
-            <Switch
-                android:id="@+id/switchTema"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="32dp"
-                android:scaleX="2.0"
-                android:scaleY="2.0"
-                android:showText="true"
-                android:textOff="☀️"
-                android:textOn="🌙"
-                app:layout_constraintHorizontal_bias="0.45" />
+        <TextView
+            android:id="@+id/tvLikedHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Beğendiğin İçerikler"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/tvFavHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Favori Listem"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewLiked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewFav"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+        <Button
+            android:id="@+id/btnBilgileriGuncelle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#f3dfc1"
+            android:text="Bilgilerimi Güncelle"
+            android:textColor="#780000"
+            android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/tvLikedHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Beğendiğin İçerikler"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp" />
+        <Button
+            android:id="@+id/btnCikis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="106dp"
+            android:backgroundTint="#780000"
+            android:text="Çıkış Yap"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewLiked"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <Button
-                android:id="@+id/btnBilgileriGuncelle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="#f3dfc1"
-                android:text="Bilgilerimi Güncelle"
-                android:textColor="#780000"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/btnCikis"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="106dp"
-                android:backgroundTint="#780000"
-                android:text="Çıkış Yap"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp" />
-
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
