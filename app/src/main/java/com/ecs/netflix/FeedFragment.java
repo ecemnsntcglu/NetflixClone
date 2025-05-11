@@ -118,55 +118,70 @@ public class FeedFragment extends Fragment {
         String userId = user.getUid();
         String collectionName = contentType.equals("Film") ? "movies" : "series";
 
-        db.collection(collectionName).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                kategoriler.clear();
-                List<String> tumTurler = new ArrayList<>();
+        // Önce CACHE sonra SERVER
+        db.collection(collectionName)
+                .get(com.google.firebase.firestore.Source.CACHE)
+                .addOnSuccessListener(cachedResult -> {
+                    if (!cachedResult.isEmpty()) {
+                        kullanicininTercihlerineGoreKategorileriHazirla(cachedResult, userId);
+                    } else {
+                        // Cache boşsa sunucudan al
+                        db.collection(collectionName)
+                                .get(com.google.firebase.firestore.Source.SERVER)
+                                .addOnSuccessListener(serverResult -> {
+                                    kullanicininTercihlerineGoreKategorileriHazirla(serverResult, userId);
+                                })
+                                .addOnFailureListener(e -> {
+                                    System.out.println("Sunucudan veri alınamadı: " + e.getMessage());
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    System.out.println("CACHE erişimi başarısız: " + e.getMessage());
+                });
+    }
 
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    List<String> genres = (List<String>) document.get("genres");
-                    if (genres != null) {
-                        for (String genre : genres) {
-                            if (!tumTurler.contains(genre)) {
-                                tumTurler.add(genre);
-                            }
-                        }
+    private void kullanicininTercihlerineGoreKategorileriHazirla(Iterable<QueryDocumentSnapshot> documents, String userId) {
+        kategoriler.clear();
+        List<String> tumTurler = new ArrayList<>();
+
+        for (QueryDocumentSnapshot document : documents) {
+            List<String> genres = (List<String>) document.get("genres");
+            if (genres != null) {
+                for (String genre : genres) {
+                    if (!tumTurler.contains(genre)) {
+                        tumTurler.add(genre);
                     }
                 }
-
-                // 🔥 Kullanıcının tercih ettiği kategorileri al
-                db.collection("users").document(userId).get().addOnSuccessListener(documentSnapshot -> {
-                    List<String> tercihEdilenTurler = new ArrayList<>();
-                    if (documentSnapshot.exists()) {
-                        tercihEdilenTurler = (List<String>) documentSnapshot.get("preferences");
-                    }
-
-                    List<Kategori> oncelikliKategoriler = new ArrayList<>();
-                    List<Kategori> digerKategoriler = new ArrayList<>();
-
-                    for (String tur : tumTurler) {
-                        Kategori kategori = new Kategori(tur, new ArrayList<>());
-                        if (tercihEdilenTurler != null && tercihEdilenTurler.contains(tur)) {
-                            oncelikliKategoriler.add(kategori); // 🔥 Kullanıcının tercih ettiği kategorileri öne al
-                        } else {
-                            digerKategoriler.add(kategori);
-                        }
-                    }
-
-                    // 🔥 Öncelikli kategorileri önce ekleyelim
-                    kategoriler.addAll(oncelikliKategoriler);
-                    kategoriler.addAll(digerKategoriler);
-
-                    kategoriAdapter.notifyDataSetChanged();
-                }).addOnFailureListener(e -> {
-                    System.out.println("Firestore'dan kullanıcı tercihleri çekilemedi: " + e.getMessage());
-                });
-
-            } else {
-                System.out.println("Firestore'dan veri çekme hatası: " + (task.getException() != null ? task.getException().getMessage() : "Bilinmeyen hata"));
             }
+        }
+
+        db.collection("users").document(userId).get().addOnSuccessListener(documentSnapshot -> {
+            List<String> tercihEdilenTurler = new ArrayList<>();
+            if (documentSnapshot.exists()) {
+                tercihEdilenTurler = (List<String>) documentSnapshot.get("preferences");
+            }
+
+            List<Kategori> oncelikliKategoriler = new ArrayList<>();
+            List<Kategori> digerKategoriler = new ArrayList<>();
+
+            for (String tur : tumTurler) {
+                Kategori kategori = new Kategori(tur, new ArrayList<>());
+                if (tercihEdilenTurler != null && tercihEdilenTurler.contains(tur)) {
+                    oncelikliKategoriler.add(kategori);
+                } else {
+                    digerKategoriler.add(kategori);
+                }
+            }
+
+            kategoriler.addAll(oncelikliKategoriler);
+            kategoriler.addAll(digerKategoriler);
+            kategoriAdapter.notifyDataSetChanged();
+        }).addOnFailureListener(e -> {
+            System.out.println("Kullanıcı tercihleri alınamadı: " + e.getMessage());
         });
     }
+
 
 
     @Override
