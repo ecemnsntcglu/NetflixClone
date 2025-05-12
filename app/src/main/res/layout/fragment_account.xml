@@ -17,48 +17,7 @@
         android:focusable="true"
         android:visibility="gone" />
 
-    <ImageView
-        android:id="@+id/imageViewProfile"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:contentDescription="Profil Resmi"
-        android:scaleType="centerCrop"
-        android:src="@drawable/fav_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tvUserName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="15dp"
-        android:text="Kullanıcı Adı"
-        android:textSize="24sp"
-        android:textStyle="bold"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageViewProfile" />
-
-
-    <TextView
-        android:id="@+id/tvBadges"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rozetler yükleniyor..."
-        android:textColor="#FFD700"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvUserName" />
 
     <!-- NestedScrollView ile içeriği kaydırılabilir hale getir -->
     <androidx.core.widget.NestedScrollView
@@ -67,7 +26,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvUserName">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/menuLayout"
@@ -75,7 +34,51 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+            <ImageView
+                android:id="@+id/imageViewProfile"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="30dp"
+                android:contentDescription="Profil Resmi"
+                android:scaleType="centerCrop"
+                android:src="@drawable/fav_btn"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
+                android:text="Kullanıcı Adı"
+                android:textSize="24sp"
+                android:textStyle="bold"
+
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/imageViewProfile" />
+
+
+            <TextView
+                android:id="@+id/tvBadges"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rozetler yükleniyor..."
+                android:layout_gravity="center"
+                android:textColor="#FFD700"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvUserName" />
             <Switch
                 android:id="@+id/switchTema"
                 android:layout_width="80dp"
