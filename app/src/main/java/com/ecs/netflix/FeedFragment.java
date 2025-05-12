@@ -68,14 +68,17 @@ public class FeedFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String selectedType = sharedPreferences.getString("contentType", "Dizi");
         // Tema yönetimi
         applyThemeSettings();
-
+        if (suggestedCont != null) {
+            suggestContent(suggestedCont);
+        }
+        setPopularCnt(selectedType);
 
         // Kategori listesi oluştur
         kategoriler = new ArrayList<>();
-        sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         kategoriAdapter = new KategoriAdapter(requireContext(), kategoriler, new ContentAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(String contentId, String type) {
@@ -90,9 +93,8 @@ public class FeedFragment extends Fragment {
         binding.parentRecyclerView.setAdapter(kategoriAdapter);
 
         // Seçili içerik türünü al ve kategorileri yükle
-        String selectedType = sharedPreferences.getString("contentType", "Dizi");
         kategorileriAl(selectedType);
-        setPopularCnt(selectedType);
+
         // Toggle butonları dinleyici ekle
         binding.toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
@@ -114,6 +116,8 @@ public class FeedFragment extends Fragment {
     }
 
     private void applyThemeSettings() {
+        if (!isAdded()) return; // 🔥 Fragment bağlı mı kontrol et
+
         ThemePrefManager themePrefManager = new ThemePrefManager(requireContext());
         int toggleGroupColor = themePrefManager.isDarkMode() ? R.color.toogle_dark : R.color.toogle_light;
         int buttonColor = themePrefManager.isDarkMode() ? R.color.toogle_dark : R.color.toogle_light;
@@ -168,16 +172,13 @@ public class FeedFragment extends Fragment {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
 
-        if (currentUser == null) return; // Kullanıcı oturum açmamışsa çık
+        if (currentUser == null) return; // 🔥 Kullanıcı oturum açmamışsa çık
 
         String currentUserId = currentUser.getUid();
-
-        // 🔥 En çok beğeni alan içerikleri saklamak için HashMap
         Map<String, Integer> contentLikeCount = new HashMap<>();
 
-        // 🔥 Seçilen türe göre en çok beğeni alan içerikleri çek
         db.collection("comments")
-                .whereEqualTo("type", selectedType) // 🔥 Seçilen türe göre filtreleme
+                .whereEqualTo("type", selectedType)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
@@ -189,11 +190,9 @@ public class FeedFragment extends Fragment {
                         }
                     }
 
-                    // 🔥 Beğeni sayısına göre sıralama
                     List<Map.Entry<String, Integer>> sortedContent = new ArrayList<>(contentLikeCount.entrySet());
-                    sortedContent.sort((a, b) -> Integer.compare(b.getValue(), a.getValue())); // Çok beğenilenler önce
+                    sortedContent.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
 
-                    // 🔥 Kullanıcının tercihlerine uygun ilk içeriği bul
                     db.collection("users").document(currentUserId)
                             .get()
                             .addOnSuccessListener(userDoc -> {
@@ -201,7 +200,7 @@ public class FeedFragment extends Fragment {
                                     List<String> preferences = (List<String>) userDoc.get("preferences");
 
                                     if (preferences != null) {
-                                        for (Map.Entry<String, Integer> entry : sortedContent) { // 🔥 Döngü içinde `break;` kullanılabilir
+                                        for (Map.Entry<String, Integer> entry : sortedContent) {
                                             String contentId = entry.getKey();
                                             String collectionName = "Dizi".equals(selectedType) ? "series" : "movies";
 
@@ -209,21 +208,20 @@ public class FeedFragment extends Fragment {
                                                     .get()
                                                     .addOnSuccessListener(documentSnapshot -> {
                                                         if (documentSnapshot.exists()) {
-                                                            List<String> contentGenres = (List<String>) documentSnapshot.get("genres"); // 🔥 İçeriğin türleri
+                                                            List<String> contentGenres = (List<String>) documentSnapshot.get("genres");
 
                                                             if (contentGenres != null && preferences != null) {
                                                                 for (String genre : contentGenres) {
                                                                     if (preferences.contains(genre)) {
                                                                         Log.d("FirebaseDebug", "İçerik uygun bulundu: " + contentId);
+                                                                        suggestedCont = contentId; // 🔥 İçeriği önerilecek olarak ata
 
-                                                                        // 🔥 Kullanıcı bu içeriğe yorum yapmış mı?
                                                                         db.collection("comments")
                                                                                 .whereEqualTo("contentId", contentId)
                                                                                 .whereEqualTo("userId", currentUserId)
                                                                                 .get()
                                                                                 .addOnSuccessListener(commentSnapshot -> {
                                                                                     if (commentSnapshot.isEmpty()) {
-                                                                                        // 🔥 Kullanıcı bu içeriğe yorum yapmamış, içeriği öner
                                                                                         suggestContent(contentId);
                                                                                     }
                                                                                 });
@@ -243,8 +241,8 @@ public class FeedFragment extends Fragment {
 
     private void suggestContent(String contentId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-suggestedCont=contentId;
-        // 🔥 Fragment bağlanmış mı kontrol et
+        suggestedCont = contentId;
+
         if (!isAdded()) {
             Log.e("FirebaseDebug", "Fragment henüz eklenmemiş, içerik önerilemiyor.");
             return;
@@ -256,17 +254,14 @@ suggestedCont=contentId;
             return;
         }
 
-        ShapeableImageView imageViewPoster = rootView.findViewById(R.id.imageView); // 🔥 ImageView bağlandı
+        ShapeableImageView imageViewPoster = rootView.findViewById(R.id.imageView);
 
-        // 🔥 SharedPreferences'den `contentType` değerini al
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        String selectedType = sharedPreferences.getString("contentType", "Dizi"); // Varsayılan "Dizi"
+        String selectedType = sharedPreferences.getString("contentType", "Dizi");
 
-        // 🔥 Seçilen türe göre koleksiyon belirle
         String collectionName = "Dizi".equals(selectedType) ? "series" : "movies";
         Log.d("FirebaseDebug", "İçerik uygun bulundu: " + contentId + " - Koleksiyon: " + collectionName);
 
-        // 🔥 Firestore'da ilgili koleksiyonda içeriği ara
         db.collection(collectionName).document(contentId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -274,7 +269,6 @@ suggestedCont=contentId;
                         String posterUrl = documentSnapshot.getString("poster_url");
                         if (posterUrl != null && !posterUrl.isEmpty()) {
                             loadPosterIntoImageView(posterUrl, imageViewPoster);
-
                         } else {
                             Log.e("FirebaseDebug", "Poster URL boş veya null!");
                         }
@@ -284,7 +278,6 @@ suggestedCont=contentId;
                 })
                 .addOnFailureListener(e -> Log.e("FirebaseDebug", "Firestore hatası: " + e.getMessage()));
     }
-
     private void loadPosterIntoImageView(String posterUrl, ShapeableImageView imageView) {
         if (!isAdded()) {
             Log.e("FirebaseDebug", "Fragment henüz eklenmemiş, görsel yüklenemiyor.");
