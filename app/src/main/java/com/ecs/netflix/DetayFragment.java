@@ -401,7 +401,7 @@ public class DetayFragment extends Fragment {
         db.collection("users").document(userId)
                 .update(listType, FieldValue.arrayRemove(entry))
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Listeden çıkarıldı ❌", Toast.LENGTH_SHORT).show();
+
                     if (listType.equals("favorites")) {
                         binding.imageFav.setImageResource(R.drawable.non_fav_btn);
                     }

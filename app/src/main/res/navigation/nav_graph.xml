@@ -74,7 +74,11 @@
         android:id="@+id/detayFragment"
         android:name="com.ecs.netflix.DetayFragment"
         android:label="DetayFragment">
-        <argument android:name="contentId" app:argType="string" />
+
+        <argument
+            android:name="contentId"
+            app:argType="string" />
+
     </fragment>
 
 
