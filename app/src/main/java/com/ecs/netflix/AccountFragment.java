@@ -117,7 +117,8 @@ public class AccountFragment extends Fragment {
                         // Glide ile resmi yükleyelim
                         Glide.with(getContext())
                                 .load(imageUri)
-                                .into(binding.imageViewProfile);  // Profil resmi ImageView'a yükle
+                                .circleCrop().into(binding.imageViewProfile);
+                        // Profil resmi ImageView'a yükle
                         saveProfileImageToFirestore(imageUri.toString());  // Firestore'a URL kaydet
                     }
                 }
@@ -174,7 +175,7 @@ public class AccountFragment extends Fragment {
                         if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
                             Glide.with(getContext())
                                     .load(profileImageUrl)
-                                    .into(binding.imageViewProfile);
+                                    .circleCrop().into(binding.imageViewProfile);
                         }
                     }
                 })

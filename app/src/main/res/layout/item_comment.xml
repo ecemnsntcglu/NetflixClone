@@ -14,12 +14,14 @@
         android:src="@drawable/fav_btn"
         android:layout_marginEnd="8dp" />
 
+
     <!-- Sağdaki metin ve ikonlar -->
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content">
+
 
         <LinearLayout
             android:orientation="horizontal"
@@ -33,17 +35,6 @@
                 android:layout_height="wrap_content"
                 android:textColor="#eeeee4"
                 android:textStyle="bold"/>
-
-            <!-- Like ve Dislike İkonları -->
-            <ImageView
-                android:id="@+id/ivstatus"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_like"
-                android:layout_marginStart="8dp"
-                android:contentDescription="Beğendim"/>
-
-
 
             <TextView
                 android:id="@+id/tvDate"
@@ -61,7 +52,13 @@
             android:textColor="#FFFFFF"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
-
+    <ImageView
+        android:id="@+id/ivstatus"
+        android:layout_width="30dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="2dp"
+        android:contentDescription="Beğendim"
+        android:src="@drawable/ic_like" />
     <!-- Düzenleme İkonu -->
 
 </LinearLayout>

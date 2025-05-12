@@ -98,7 +98,7 @@ public class KayitFragment extends Fragment {
 
 
     private void selectFavoriteGenres(String userId) {
-        String[] diziTurleri = {"Aksiyon", "Bilim Kurgu", "Komedi", "Dram", "Korku", "Gerilim"};
+        String[] diziTurleri = {"Aksiyon", "Bilim Kurgu", "Komedi", "Dram", "Korku", "Gerilim","Animasyon","Romantik"};
         boolean[] secilenTurler = new boolean[diziTurleri.length];
         List<String> seciliTurlerListesi = new ArrayList<>();
 

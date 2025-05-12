@@ -74,7 +74,7 @@ public class DetayFragment extends Fragment {
         CommentAdapter adapter = new CommentAdapter(getContext(), comments);
         binding.recyclerViewComments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewComments.setAdapter(adapter);
-
+        String selectedType = sharedPreferences.getString("contentType", "Dizi");
 // 2. Yorumları dinle
         String contentId = getArguments().getString("contentId");
         db.collection("comments")
@@ -127,7 +127,8 @@ public class DetayFragment extends Fragment {
             FirebaseUser u = auth.getCurrentUser();
             if (u != null && !txt.isEmpty()) {
                 long currentTime = System.currentTimeMillis();
-                Comment newComment = new Comment(u.getUid(), txt, currentTime);
+
+                Comment newComment = new Comment(u.getUid(), txt, selectedType,status,currentTime);
 
                 // 1. Firestore'a gönder
                 Map<String, Object> m = new HashMap<>();
@@ -135,7 +136,9 @@ public class DetayFragment extends Fragment {
                 m.put("commentText", txt);
                 m.put("timestamp", currentTime);
                 m.put("contentId", contentId);
+                m.put("type",selectedType);
                 m.put("status",status);
+
 
                 db.collection("comments").add(m)
                         .addOnSuccessListener(doc -> {

@@ -81,13 +81,14 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="20dp"
                 android:scaleX="2.0"
                 android:scaleY="2.0"
                 android:showText="true"
                 android:textOff="☀️"
                 android:textOn="🌙"
-                app:layout_constraintHorizontal_bias="0.45" />
+                 />
 
             <TextView
                 android:id="@+id/tvFavHeader"
