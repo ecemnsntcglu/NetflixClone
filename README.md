@@ -1,4 +1,4 @@
-# 🍿 Netflix Clone: Smart Entertainment Streaming Platform
+# 🍿 Cherryflix: Smart Entertainment Streaming Platform
 
 Netflix Clone is an interactive media discovery platform that focuses on content exploration through high-quality trailers and social engagement. It digitizes the "what to watch next" process by combining official previews with a robust community-driven feedback system.
 
@@ -32,3 +32,16 @@ Media Engine: YouTube Android Player API for seamless trailer playback.
 Image Processing: Glide (handling poster rendering and circular profile photos).
 
 Data Storage: SharedPreferences for theme persistence and local user preferences.
+
+## Screenshots
+<img width="180" height="400" alt="image" src="https://github.com/user-attachments/assets/35c0815d-8d2b-40a2-822d-fa88fc4085e7" />
+<img width="190" height="400" alt="image" src="https://github.com/user-attachments/assets/ca5afce1-cf85-4aa9-8fd3-6b8f04aaee2b" />
+<img width="180" height="400" alt="image" src="https://github.com/user-attachments/assets/606aeb97-859a-4532-9265-e1a5e9066552" />
+
+<img width="180" height="400" alt="image" src="https://github.com/user-attachments/assets/20e71cda-c0cd-4d55-8259-f95cc3ee4ea2" />
+<img width="180" height="400" alt="image" src="https://github.com/user-attachments/assets/28ad7502-3950-4380-8446-4888c93636e4" />
+
+<img width="180" height="400" alt="image" src="https://github.com/user-attachments/assets/1171b196-abc5-4602-9cb4-8eddc0456921" />
+
+
+
